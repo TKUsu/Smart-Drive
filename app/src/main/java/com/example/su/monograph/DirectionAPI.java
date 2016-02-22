@@ -1,6 +1,7 @@
 package com.example.su.monograph;
 
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -17,6 +18,8 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import static android.widget.Toast.LENGTH_SHORT;
 
 /**
  * Created by Nicole on 2015/12/17.
@@ -78,7 +81,6 @@ public class DirectionAPI {
         JSONArray jSteps = null;
 
         try {
-
             jRoutes = jObject.getJSONArray("routes");
 
             /** Traversing all routes */

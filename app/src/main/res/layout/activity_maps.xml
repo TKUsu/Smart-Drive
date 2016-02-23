@@ -16,52 +16,25 @@
             android:layout_height="match_parent"
             android:layout_weight="1">
 
-            <LinearLayout
-                android:orientation="horizontal"
+            <AutoCompleteTextView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1">
+                android:layout_height="wrap_content"
+                android:hint="Start Location"
+                android:id="@+id/startautocomtxt"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentStart="true"
+                android:layout_weight="1"
+                android:inputType="textAutoComplete"/>
 
-                <AutoCompleteTextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Start Location"
-                    android:id="@+id/startautocomtxt"
-                    android:layout_alignParentTop="true"
-                    android:layout_alignParentStart="true"
-                    android:layout_weight="1"
-                    android:inputType="textAutoComplete"/>
-
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/SearchB1"
-                    android:layout_weight="1" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:orientation="horizontal"
+            <AutoCompleteTextView
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1">
-
-                <AutoCompleteTextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="End Location"
-                    android:id="@+id/endautocomtxt"
-                    android:layout_alignParentTop="true"
-                    android:layout_alignParentStart="true"
-                    android:layout_weight="1"
-                    android:inputType="textAutoComplete"/>
-
-                <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/SearchB2"
-                    android:layout_weight="1" />
-            </LinearLayout>
-
+                android:layout_height="wrap_content"
+                android:hint="End Location"
+                android:id="@+id/endautocomtxt"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentStart="true"
+                android:layout_weight="1"
+                android:inputType="textAutoComplete"/>
         </LinearLayout>
 
         <LinearLayout
@@ -82,11 +55,10 @@
                 android:layout_height="match_parent"
                 android:text="Navigation"
                 android:id="@+id/NavigationB"
-                android:onClick="onNavigation"
+                android:onClick="onSearch"
                 android:layout_weight="1"
                 android:elevation="20dp"
                 android:translationZ="2dp"/>
-
         </LinearLayout>
 
 

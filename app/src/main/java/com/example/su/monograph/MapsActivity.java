@@ -2,7 +2,6 @@ package com.example.su.monograph;
 
 import android.Manifest;
 import android.annotation.TargetApi;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Address;
@@ -22,17 +21,12 @@ import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
-import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.drive.Drive;
-import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.LocationSource;
@@ -60,7 +54,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private AutoCompleteTextView startautoCompView = null, endautiComView = null;
     private String startstr = null, endstr = null;
-    private int ButtonNumber = 0;
 
     private LocationManager mLocationmgr;
     private Location mLocation;
@@ -84,8 +77,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         startautoCompView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-//                startstr = (String) adapterView.getItemAtPosition(position);
-                startstr = startautoCompView.getText().toString();
+                startstr = (String) adapterView.getItemAtPosition(position);
             }
         });
 
@@ -94,26 +86,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         endautiComView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-//                endstr = (String) adapterView.getItemAtPosition(position);
-                endstr = endautiComView.getText().toString();
+                endstr = (String) adapterView.getItemAtPosition(position);
             }
         });
-        Button SBT1 = (Button)findViewById(R.id.SearchB1);
-        SBT1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onSearch();
-                ButtonNumber = 0;
-            }
-        });
-        Button SBT2 = (Button)findViewById(R.id.SearchB2);
-        SBT2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onSearch();
-                ButtonNumber = 1;
-            }
-        });
+
+
+//        TextView tv = (TextView)findViewById(R.id.LatLonTv);
+//        tv.setText("Location Latitude:"+mLocation.getLatitude()+" Longitude"+mLocation.getLongitude());
+//        LinearLayout searchbar = (LinearLayout)findViewById(R.id.searchBar);
+//        searchbar.setAnimation(AnimationUtils.loadAnimation(this, R.anim.anim_trans_in));
     }
     @Override
     protected void onStart() {
@@ -127,41 +108,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onStop();
     }
 
-    private static final int REQUEST_PLACE_PICKER = 1;
-    public void onSearch(){
-        PlacePicker.IntentBuilder intentBuilder = new PlacePicker.IntentBuilder();
-        Intent intent;
-        try {
-            intent = intentBuilder.build(MapsActivity.this);
-            startActivityForResult(intent, REQUEST_PLACE_PICKER);
-        } catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
-            e.printStackTrace();
-        }
-    }
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_PLACE_PICKER && resultCode == RESULT_OK) {
-            // The user has selected a place. Extract the name and address.
-            final Place place = PlacePicker.getPlace(data, this);
-
-            final CharSequence name = place.getName();
-            final CharSequence address = place.getAddress();
-            String attributions = PlacePicker.getAttributions(data);
-            if (attributions == null) {
-                attributions = "";
-            }
-            if(ButtonNumber == 0){
-                startautoCompView.setText(name);
-                startstr = name.toString();
-            }else if (ButtonNumber == 1){
-                endautiComView.setText(name);
-                endstr = name.toString();
-            }
-        }
-    }
-
-    public void onNavigation(View view) {
-
+    public void onSearch(View view) {
         if (startstr == null || startstr.equals("")) {
             Toast.makeText(MapsActivity.this, R.string.startlocationnull, LENGTH_SHORT).show();
         } else if (endstr == null || endstr.equals("")) {
@@ -208,7 +155,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         uis.setCompassEnabled(true);
         mMap.setLocationSource(this);
         mMap.setMyLocationEnabled(true);
-        mMap.setTrafficEnabled(false);
+        mMap.setTrafficEnabled(true);
 
         if (Build.VERSION.SDK_INT>=23 && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -299,10 +246,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 // for Activity#requestPermissions for more details.
                 return;
             }
-            mLocationmgr.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1, 1, this);
+            mLocationmgr.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
             Toast.makeText(MapsActivity.this,"Use GPS locate", LENGTH_SHORT).show();
         }else if (mLocationmgr.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-            mLocationmgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1, 1, this);
+            mLocationmgr.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
             Toast.makeText(MapsActivity.this, "Use network locate", LENGTH_SHORT).show();
         }
     }
@@ -365,7 +312,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             JSONObject jObject;
             List<List<HashMap<String, String>>> routes = null;
             try {
-//                Log.e(MapsActivity.class.getName(), String.valueOf(jsonData[0]));
+                Log.e(MapsActivity.class.getName(), String.valueOf(jsonData[0]));
+
                 jObject = new JSONObject(jsonData[0]);
                 // Starts parsing data
                 routes = DctAPI.parse(jObject);
@@ -406,6 +354,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 lineOptions.addAll(points);
                 lineOptions.width(5);  //導航路徑寬度
                 lineOptions.color(Color.BLUE); //導航路徑顏色
+
             }
 
             // Drawing polyline in the Google Map for the i-th route

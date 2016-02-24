@@ -1,32 +1,28 @@
-package com.example.su.monograph;
+package com.su.Tap;
 
 import android.Manifest;
-import android.annotation.TargetApi;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
-import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.widget.Button;
 import android.widget.Toast;
 
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.drive.Drive;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.LocationSource;
@@ -35,14 +31,10 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.wearable.Wearable;
 
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -54,6 +46,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private AutoCompleteTextView startautoCompView = null, endautiComView = null;
     private String startstr = null, endstr = null;
+    private int ButtonNumber = 0;
 
     private LocationManager mLocationmgr;
     private Location mLocation;
@@ -77,7 +70,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         startautoCompView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                startstr = (String) adapterView.getItemAtPosition(position);
+//                startstr = (String) adapterView.getItemAtPosition(position);
+//                startstr = startautoCompView.getText().toString();
             }
         });
 
@@ -86,29 +80,73 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         endautiComView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-                endstr = (String) adapterView.getItemAtPosition(position);
+//                endstr = (String) adapterView.getItemAtPosition(position);
+//                endstr = endautiComView.getText().toString();
             }
         });
-
-
-//        TextView tv = (TextView)findViewById(R.id.LatLonTv);
-//        tv.setText("Location Latitude:"+mLocation.getLatitude()+" Longitude"+mLocation.getLongitude());
-//        LinearLayout searchbar = (LinearLayout)findViewById(R.id.searchBar);
-//        searchbar.setAnimation(AnimationUtils.loadAnimation(this, R.anim.anim_trans_in));
+        Button SBT1 = (Button)findViewById(R.id.SearchB1);
+        SBT1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onSearch();
+                ButtonNumber = 0;
+            }
+        });
+        Button SBT2 = (Button)findViewById(R.id.SearchB2);
+        SBT2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onSearch();
+                ButtonNumber = 1;
+            }
+        });
     }
     @Override
     protected void onStart() {
         super.onStart();
         if(mMap !=null && !mMap.isMyLocationEnabled())
             mMap.setMyLocationEnabled(true);
-
     }
     @Override
     protected void onStop() {
         super.onStop();
     }
 
-    public void onSearch(View view) {
+    private static final int REQUEST_PLACE_PICKER = 1;
+    public void onSearch(){
+        PlacePicker.IntentBuilder intentBuilder = new PlacePicker.IntentBuilder();
+        Intent intent;
+        try {
+            intent = intentBuilder.build(MapsActivity.this);
+            startActivityForResult(intent, REQUEST_PLACE_PICKER);
+        } catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
+            e.printStackTrace();
+        }
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_PLACE_PICKER && resultCode == RESULT_OK) {
+            // The user has selected a place. Extract the name and address.
+            final Place place = PlacePicker.getPlace(data, this);
+
+            final CharSequence name = place.getName();
+            final CharSequence address = place.getAddress();
+            String attributions = PlacePicker.getAttributions(data);
+            if (attributions == null) {
+                attributions = "";
+            }
+            if(ButtonNumber == 0){
+                startautoCompView.setText(name);
+                startstr = name.toString();
+            }else if (ButtonNumber == 1){
+                endautiComView.setText(name);
+                endstr = name.toString();
+            }
+        }
+    }
+    public void onNavigation(View view) {
+        startstr = startautoCompView.getText().toString();
+        endstr = endautiComView.getText().toString();
         if (startstr == null || startstr.equals("")) {
             Toast.makeText(MapsActivity.this, R.string.startlocationnull, LENGTH_SHORT).show();
         } else if (endstr == null || endstr.equals("")) {
@@ -116,46 +154,29 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } else {
             DownloadTask downloadTask = new DownloadTask();
             downloadTask.execute();
-
-//            Geocoder geo = new Geocoder(this);
-//            try {
-//                startaddressList = geo.getFromLocationName(startstr, 10);
-//                endaddressList = geo.getFromLocationName(endstr, 10);
-//            } catch (IOException e) {
-//                Log.e("Maps_onSearch", "Error address on Search", e);
-//            }
-//            Address startaddress = startaddressList.get(0);
-//            LatLng startlatLng = new LatLng(startaddress.getLatitude(), startaddress.getLongitude());
-//            mMap.addMarker(new MarkerOptions().position(startlatLng).title(startstr));
-//            mMap.animateCamera(CameraUpdateFactory.newLatLng(startlatLng));
-//
-//            Address endaddress = endaddressList.get(0);
-//            LatLng endlatLng = new LatLng(endaddress.getLatitude(), endaddress.getLongitude());
-//            mMap.addMarker(new MarkerOptions().position(startlatLng).title(endstr));
-//            mMap.animateCamera(CameraUpdateFactory.newLatLng(startlatLng));
         }
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        LatLng mlatlng;
+//        LatLng mlatlng;
 
-        // Add a marker in Sydney and move the camera
-        if (mLocation != null) {
-            mlatlng = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mlatlng, 15));
-        }else{
-            mlatlng = new LatLng(121.5,25);
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mlatlng, 15));
-        }
+//        // Add a marker in Sydney and move the camera
+//        if (mLocation != null) {
+//            mlatlng = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
+//            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mlatlng, 15));
+//        }else{
+//            mlatlng = new LatLng(121.5,25);
+//            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mlatlng, 15));
+//        }
         UiSettings uis = mMap.getUiSettings();
         uis.setMyLocationButtonEnabled(true);
         uis.setZoomControlsEnabled(true);
         uis.setCompassEnabled(true);
         mMap.setLocationSource(this);
         mMap.setMyLocationEnabled(true);
-        mMap.setTrafficEnabled(true);
+        mMap.setTrafficEnabled(false);
 
         if (Build.VERSION.SDK_INT>=23 && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -198,7 +219,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (mLocationchangeListener != null)
             mLocationchangeListener.onLocationChanged(location);
         this.mLocation = location;
-        mMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()),15));
     }
 
     @Override
@@ -270,13 +291,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Toast.makeText(MapsActivity.this, "Locate is stop", LENGTH_SHORT).show();
     }
 
+    //---------------------------------------------------------------------------------
     // Fetches data from url passed
     private class DownloadTask extends AsyncTask<Void, Void, String> {
-
         // Downloading data in non-ui thread
         @Override
         protected String doInBackground(Void... params) {
-
             // For storing data from web service
             String data = "";  try {
                 // Fetching the data from web service
@@ -288,23 +308,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
             return data;
         }
-
         // Executes in UI thread, after the execution of
         // doInBackground()
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-
             ParserTask parserTask = new ParserTask();
-
             // Invokes the thread for parsing the JSON data
             parserTask.execute(result);
-
         }
     } /** 解析JSON格式 **/
+
     private class ParserTask extends
             AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
-
         // Parsing the data in non-ui thread
         @Override
         protected List<List<HashMap<String, String>>> doInBackground(
@@ -312,8 +328,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             JSONObject jObject;
             List<List<HashMap<String, String>>> routes = null;
             try {
-                Log.e(MapsActivity.class.getName(), String.valueOf(jsonData[0]));
-
+//                Log.e(MapsActivity.class.getName(), String.valueOf(jsonData[0]));
                 jObject = new JSONObject(jsonData[0]);
                 // Starts parsing data
                 routes = DctAPI.parse(jObject);
@@ -322,7 +337,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
             return routes;
         }
-
         // Executes in UI thread, after the parsing process
         @Override
         protected void onPostExecute(List<List<HashMap<String, String>>> result) {
@@ -354,9 +368,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 lineOptions.addAll(points);
                 lineOptions.width(5);  //導航路徑寬度
                 lineOptions.color(Color.BLUE); //導航路徑顏色
-
             }
-
             // Drawing polyline in the Google Map for the i-th route
             if(lineOptions != null)
                 mMap.addPolyline(lineOptions);

@@ -1,4 +1,4 @@
-package com.example.su.monograph;
+package com.su.Tap;
 
 import android.util.Log;
 
@@ -78,7 +78,6 @@ public class DirectionAPI {
         JSONArray jSteps = null;
 
         try {
-
             jRoutes = jObject.getJSONArray("routes");
 
             /** Traversing all routes */

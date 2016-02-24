@@ -1,4 +1,4 @@
-package com.example.su.monograph;
+package com.su.Tap;
 
 import org.junit.Test;
 

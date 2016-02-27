@@ -17,6 +17,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.RemoteViews;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -31,9 +33,11 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,8 +48,13 @@ import static android.widget.Toast.LENGTH_SHORT;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, LocationSource {
 
     private GoogleMap mMap;
+    private Polyline polylineFinal = null;
     private AutoCompleteTextView startautoCompView = null, endautiComView = null;
-    private String startstr = null, endstr = null;
+    private TextView Time;
+    private Button startdelete,enddelete;
+
+    private String start = null, end = null;
+    private CharSequence place_startname = null,place_startaddress = null,place_endname = null,place_endaddress = null;
     private int ButtonNumber = 0;
 
     private LocationManager mLocationmgr;
@@ -65,31 +74,67 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         mLocationmgr = (LocationManager) getSystemService(LOCATION_SERVICE);
 
+        startdelete = (Button)findViewById(R.id.delete);
+
         startautoCompView = (AutoCompleteTextView) findViewById(R.id.startautocomtxt);
         startautoCompView.setAdapter(new PlacesAutoCompleteAdapter(this, R.layout.autocomplete_list_item));
-        startautoCompView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-//                startstr = (String) adapterView.getItemAtPosition(position);
-//                startstr = startautoCompView.getText().toString();
-            }
-        });
+//        startautoCompView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+//            }
+//        });
 
         endautiComView = (AutoCompleteTextView) findViewById(R.id.endautocomtxt);
         endautiComView.setAdapter(new PlacesAutoCompleteAdapter(this, R.layout.autocomplete_list_item));
-        endautiComView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-//                endstr = (String) adapterView.getItemAtPosition(position);
-//                endstr = endautiComView.getText().toString();
-            }
-        });
+//        endautiComView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+//            }
+//        });
+
+//        if (startautoCompView.getText().toString() == "" || startautoCompView.getText().toString() == null) {
+//            startdelete.setEnabled(false);
+//            RemoteViews remoteViews =
+//                    new RemoteViews(context.getPackageName(), R.layout.);
+//            remoteViews.setOnClickPendingIntent
+//                    (
+//                            R.id.Button01, configPendingIntent
+//                    );
+//        }
+//        else    startdelete.setEnabled(true);
+
+//        startdelete.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                start = null;
+////                polylineFinal.remove();
+//                startautoCompView.setText(null);
+//                place_startname = place_startaddress = null;
+//            }
+//        });
+//
+//        enddelete = (Button)findViewById(R.id.delete2);
+//        if (endautiComView.getText().toString() == "" || endautiComView.getText().toString() == null)
+//            enddelete.setEnabled(false);
+//        else{
+//            enddelete.setEnabled(true);
+//        }
+//        enddelete.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                end = null;
+////                polylineFinal.remove();
+//                endautiComView.setText(null);
+//                place_endname = place_endaddress = null;
+//            }
+//        });
+
         Button SBT1 = (Button)findViewById(R.id.SearchB1);
         SBT1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onSearch();
-                ButtonNumber = 0;
+                ButtonNumber = 1;
             }
         });
         Button SBT2 = (Button)findViewById(R.id.SearchB2);
@@ -97,7 +142,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View v) {
                 onSearch();
-                ButtonNumber = 1;
+                ButtonNumber = 2;
             }
         });
     }
@@ -135,21 +180,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             if (attributions == null) {
                 attributions = "";
             }
-            if(ButtonNumber == 0){
+            if(ButtonNumber == 1){
                 startautoCompView.setText(name);
-                startstr = name.toString();
-            }else if (ButtonNumber == 1){
+                start = address.toString();
+                if (address.equals("台灣"))   start = name.toString();
+                this.place_startname = name.toString();
+                this.place_startaddress = address.toString();
+            }else if (ButtonNumber == 2){
                 endautiComView.setText(name);
-                endstr = name.toString();
+                end = address.toString();
+                if (address.equals("台灣"))   end = name.toString();
+                this.place_endname = name.toString();
+                this.place_endaddress = address.toString();
             }
         }
     }
     public void onNavigation(View view) {
-        startstr = startautoCompView.getText().toString();
-        endstr = endautiComView.getText().toString();
-        if (startstr == null || startstr.equals("")) {
+        if (start !=  place_startname && start != place_startaddress){
+            start = startautoCompView.getText().toString();
+        }else if (end !=  place_endname && end != place_endaddress){
+            end = endautiComView.getText().toString();
+        }
+        if (start == null || start.equals("")) {
             Toast.makeText(MapsActivity.this, R.string.startlocationnull, LENGTH_SHORT).show();
-        } else if (endstr == null || endstr.equals("")) {
+        } else if (end == null || end.equals("")) {
             Toast.makeText(MapsActivity.this, R.string.endlocationnull, LENGTH_SHORT).show();
         } else {
             DownloadTask downloadTask = new DownloadTask();
@@ -160,20 +214,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-//        LatLng mlatlng;
 
-//        // Add a marker in Sydney and move the camera
-//        if (mLocation != null) {
-//            mlatlng = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
-//            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mlatlng, 15));
-//        }else{
-//            mlatlng = new LatLng(121.5,25);
-//            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mlatlng, 15));
-//        }
         UiSettings uis = mMap.getUiSettings();
         uis.setMyLocationButtonEnabled(true);
         uis.setZoomControlsEnabled(true);
         uis.setCompassEnabled(true);
+        uis.setAllGesturesEnabled(true);
         mMap.setLocationSource(this);
         mMap.setMyLocationEnabled(true);
         mMap.setTrafficEnabled(false);
@@ -219,7 +265,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (mLocationchangeListener != null)
             mLocationchangeListener.onLocationChanged(location);
         this.mLocation = location;
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()),15));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 15));
     }
 
     @Override
@@ -300,7 +346,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // For storing data from web service
             String data = "";  try {
                 // Fetching the data from web service
-                data = DctAPI.downloadUrl(startstr,endstr);
+                data = DctAPI.downloadUrl(start,end);
                 if (data == null)
                     Log.d("Error data", data);
             } catch (Exception e) {
@@ -330,6 +376,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             try {
 //                Log.e(MapsActivity.class.getName(), String.valueOf(jsonData[0]));
                 jObject = new JSONObject(jsonData[0]);
+                String status = jObject.getString("status");
+                if (!status.equals("OK"))
+                    Toast.makeText(MapsActivity.this,"NOT_FOUND",Toast.LENGTH_SHORT).show();
                 // Starts parsing data
                 routes = DctAPI.parse(jObject);
             } catch (Exception e) {
@@ -343,37 +392,36 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             ArrayList<LatLng> points = null;
             PolylineOptions lineOptions = null;
             MarkerOptions markerOptions = new MarkerOptions();
-
-            Log.e(MapsActivity.class.getName(), String.valueOf(result.size()));
+            int i,j;
 
             // Traversing through all the routes
-            for (int i = 0; i < result.size(); i++) {
+            for (i = 0; i < result.size(); i++) {
                 points = new ArrayList<LatLng>();
                 lineOptions = new PolylineOptions();
 
                 // Fetching i-th route
                 List<HashMap<String, String>> path = result.get(i);  // Fetching all the points in i-th route
-                for (int j = 0; j < path.size(); j++) {
+                for (j = 0; j < path.size(); j++) {
                     HashMap<String, String> point = path.get(j);
 
                     double lat = Double.parseDouble(point.get("lat"));
                     double lng = Double.parseDouble(point.get("lng"));
                     LatLng position = new LatLng(lat, lng);
-//                    System.out.println("=====================================================");
-//                    System.out.println("path size:" + path.size());
                     points.add(position);
+                    if (i==0 && j==0)
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position,15));
                 }
 
                 // Adding all the points in the route to LineOptions
                 lineOptions.addAll(points);
-                lineOptions.width(5);  //導航路徑寬度
+                lineOptions.width(6);  //導航路徑寬度
                 lineOptions.color(Color.BLUE); //導航路徑顏色
             }
             // Drawing polyline in the Google Map for the i-th route
             if(lineOptions != null)
-                mMap.addPolyline(lineOptions);
+                polylineFinal = mMap.addPolyline(lineOptions);
             else
-                Log.e(MapsActivity.class.getName(),"Error List size == 0");
+                Log.e(MapsActivity.class.getName(), "Error List size == 0");
         }
     }
 }

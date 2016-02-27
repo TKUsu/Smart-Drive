@@ -8,7 +8,8 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="100dp"
-        android:id="@+id/searchBar">
+        android:id="@+id/searchBar"
+        android:background="#3d5afe">
 
         <LinearLayout
             android:orientation="vertical"
@@ -30,13 +31,26 @@
                     android:layout_alignParentTop="true"
                     android:layout_alignParentStart="true"
                     android:layout_weight="1"
-                    android:inputType="textAutoComplete"/>
+                    android:inputType="textAutoComplete"
+                    style="@style/Widget.AppCompat.SearchView.ActionBar" />
 
                 <Button
-                    android:layout_width="wrap_content"
+                    android:layout_width="25dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/delete"
+                    android:background="@mipmap/ic_delete"
+                    android:layout_marginLeft="2dp"
+                    android:layout_marginRight="2dp"
+                    android:layout_marginBottom="20dp"
+                    style="@style/Widget.AppCompat.Button.Small"
+                    android:enabled="true" />
+
+                <Button
+                    android:layout_width="45dp"
                     android:layout_height="wrap_content"
                     android:id="@+id/SearchB1"
-                    android:layout_weight="1" />
+                    android:background="@mipmap/ic_place"
+                    style="@style/Widget.AppCompat.Button.Small" />
             </LinearLayout>
 
             <LinearLayout
@@ -53,13 +67,26 @@
                     android:layout_alignParentTop="true"
                     android:layout_alignParentStart="true"
                     android:layout_weight="1"
-                    android:inputType="textAutoComplete"/>
+                    android:inputType="textAutoComplete"
+                    style="@style/Widget.AppCompat.SearchView.ActionBar" />
 
                 <Button
-                    android:layout_width="wrap_content"
+                    android:layout_width="25dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/delete2"
+                    android:background="@mipmap/ic_delete"
+                    android:layout_marginLeft="2dp"
+                    android:layout_marginRight="2dp"
+                    android:layout_marginBottom="20dp"
+                    style="@style/Widget.AppCompat.Button.Small"
+                    android:enabled="true" />
+
+                <Button
+                    android:layout_width="45dp"
                     android:layout_height="wrap_content"
                     android:id="@+id/SearchB2"
-                    android:layout_weight="1" />
+                    android:background="@mipmap/ic_place"
+                    style="@style/Widget.AppCompat.Button.Small" />
             </LinearLayout>
 
         </LinearLayout>
@@ -68,13 +95,13 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_weight="1.5">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:id="@+id/TimeTv"
+                android:id="@+id/Time"
                 android:layout_weight="2" />
 
             <Button
@@ -85,7 +112,8 @@
                 android:onClick="onNavigation"
                 android:layout_weight="1"
                 android:elevation="20dp"
-                android:translationZ="2dp"/>
+                android:translationZ="2dp"
+                style="@style/Widget.AppCompat.Button.Borderless" />
 
         </LinearLayout>
 
@@ -100,12 +128,4 @@
             tools:context=".MapsActivity"
             android:name="com.google.android.gms.maps.SupportMapFragment" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:id="@+id/LatLonTv"
-        android:layout_gravity="right"
-        android:background="#00000000"
-        android:layout_alignParentBottom="true"/>
 </LinearLayout>

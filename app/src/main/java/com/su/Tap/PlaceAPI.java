@@ -59,8 +59,6 @@ public class PlaceAPI {
         }
 
         try {
-            // Log.d(TAG, jsonResults.toString());
-
             // Create a JSON object hierarchy from the results
             JSONObject jsonObj = new JSONObject(jsonResults.toString());
             JSONArray predsJsonArray = jsonObj.getJSONArray("predictions");

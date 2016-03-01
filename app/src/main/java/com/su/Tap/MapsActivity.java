@@ -12,6 +12,8 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -78,6 +80,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         startautoCompView = (AutoCompleteTextView) findViewById(R.id.startautocomtxt);
         startautoCompView.setAdapter(new PlacesAutoCompleteAdapter(this, R.layout.autocomplete_list_item));
+        startautoCompView.addTextChangedListener(startACVtxtchange);
 //        startautoCompView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 //            @Override
 //            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
@@ -156,6 +159,39 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onStop() {
         super.onStop();
     }
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+
+        UiSettings uis = mMap.getUiSettings();
+        uis.setMyLocationButtonEnabled(true);
+        uis.setZoomControlsEnabled(true);
+        uis.setCompassEnabled(true);
+        uis.setAllGesturesEnabled(true);
+        mMap.setLocationSource(this);
+        mMap.setMyLocationEnabled(true);
+        mMap.setTrafficEnabled(false);
+
+        if (Build.VERSION.SDK_INT>=23 && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    public void requestPermissions(@NonNull String[] permissions, int requestCode)
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for Activity#requestPermissions for more details.
+            return;
+        }
+        Location location = mLocationmgr.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        if (location == null)
+            location = mLocationmgr.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        if (location != null) {
+            Toast.makeText(MapsActivity.this, "Get success the position the former", LENGTH_SHORT).show();
+            onLocationChanged(location);
+        } else
+            Toast.makeText(MapsActivity.this, "Get failure the position the former", LENGTH_SHORT).show();
+    }
 
     private static final int REQUEST_PLACE_PICKER = 1;
     public void onSearch(){
@@ -211,39 +247,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
+    private TextWatcher startACVtxtchange = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-        UiSettings uis = mMap.getUiSettings();
-        uis.setMyLocationButtonEnabled(true);
-        uis.setZoomControlsEnabled(true);
-        uis.setCompassEnabled(true);
-        uis.setAllGesturesEnabled(true);
-        mMap.setLocationSource(this);
-        mMap.setMyLocationEnabled(true);
-        mMap.setTrafficEnabled(false);
-
-        if (Build.VERSION.SDK_INT>=23 && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    public void requestPermissions(@NonNull String[] permissions, int requestCode)
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for Activity#requestPermissions for more details.
-            return;
         }
-        Location location = mLocationmgr.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        if (location == null)
-            location = mLocationmgr.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-        if (location != null) {
-            Toast.makeText(MapsActivity.this, "Get success the position the former", LENGTH_SHORT).show();
-            onLocationChanged(location);
-        } else
-            Toast.makeText(MapsActivity.this, "Get failure the position the former", LENGTH_SHORT).show();
-    }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+
+        }
+    };
+
 //------------------Location Source
     @Override
     public void activate(OnLocationChangedListener listener) {

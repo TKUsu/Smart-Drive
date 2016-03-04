@@ -35,22 +35,12 @@
                     style="@style/Widget.AppCompat.SearchView.ActionBar" />
 
                 <Button
-                    android:layout_width="25dp"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/delete"
-                    android:background="@mipmap/ic_delete"
-                    android:layout_marginLeft="2dp"
-                    android:layout_marginRight="2dp"
-                    android:layout_marginBottom="20dp"
-                    style="@style/Widget.AppCompat.Button.Small"
-                    android:enabled="true" />
-
-                <Button
                     android:layout_width="45dp"
                     android:layout_height="wrap_content"
-                    android:id="@+id/SearchB1"
+                    android:id="@+id/placeB1"
                     android:background="@mipmap/ic_place"
-                    style="@style/Widget.AppCompat.Button.Small" />
+                    style="@style/Widget.AppCompat.Button.Small"
+                    android:onClick="onSearch" />
             </LinearLayout>
 
             <LinearLayout
@@ -71,22 +61,12 @@
                     style="@style/Widget.AppCompat.SearchView.ActionBar" />
 
                 <Button
-                    android:layout_width="25dp"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/delete2"
-                    android:background="@mipmap/ic_delete"
-                    android:layout_marginLeft="2dp"
-                    android:layout_marginRight="2dp"
-                    android:layout_marginBottom="20dp"
-                    style="@style/Widget.AppCompat.Button.Small"
-                    android:enabled="true" />
-
-                <Button
                     android:layout_width="45dp"
                     android:layout_height="wrap_content"
-                    android:id="@+id/SearchB2"
+                    android:id="@+id/placeB2"
                     android:background="@mipmap/ic_place"
-                    style="@style/Widget.AppCompat.Button.Small" />
+                    style="@style/Widget.AppCompat.Button.Small"
+                    android:onClick="onSearch" />
             </LinearLayout>
 
         </LinearLayout>

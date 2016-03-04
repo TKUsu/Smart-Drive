@@ -29,7 +29,47 @@ public class DirectionAPI {
     private static final String OUT_JSON = "/json";
     private static final String API_KEY = "AIzaSyCB8BnZRQebibovCtIMpELFC3EoxLScSZA";
 
-//    public String downloadUrl(LatLng origin, LatLng dest) {
+    public String downloadUrl(LatLng origin, LatLng dest) {
+        String data = null;
+
+        HttpURLConnection conn = null;
+        StringBuilder jsonResults = new StringBuilder();
+
+        try {
+            StringBuilder sb = new StringBuilder(PLACES_API_BASE + OUT_JSON);
+            sb.append("?key=" + API_KEY);
+            sb.append("&components=country:tw");
+//            sb.append("&types=(cities)");
+            sb.append("&origin=" + origin.latitude + "," + origin.longitude );
+            sb.append("&destination=" + dest.latitude + "," + dest.longitude);
+
+            URL url = new URL(sb.toString());
+            conn = (HttpURLConnection) url.openConnection();
+            InputStreamReader in = new InputStreamReader(conn.getInputStream());
+
+            // Load the results into a StringBuilder
+            int read;
+            char[] buff = new char[1024];
+            while ((read = in.read(buff)) != -1) {
+                jsonResults.append(buff, 0, read);
+            }
+            data = jsonResults.toString();
+            in.close();
+        } catch (MalformedURLException e) {
+            Log.e(TAG, "Error processing Places API URL", e);
+            return data;
+        } catch (IOException e) {
+            Log.e(TAG, "Error connecting to Places API", e);
+            return data;
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+        return data;
+    }
+//
+//    public String downloadUrl(String origin, String destination) {
 //        String data = null;
 //
 //        HttpURLConnection conn = null;
@@ -40,8 +80,8 @@ public class DirectionAPI {
 //            sb.append("?key=" + API_KEY);
 //            sb.append("&components=country:tw");
 ////            sb.append("&types=(cities)");
-//            sb.append("&origin=" + origin.latitude + "," + origin.longitude );
-//            sb.append("&destination=" + dest.latitude + "," + dest.longitude);
+//            sb.append("&origin=" + URLEncoder.encode(origin, "utf8"));
+//            sb.append("&destination=" + URLEncoder.encode(destination, "utf8"));
 //
 //            URL url = new URL(sb.toString());
 //            conn = (HttpURLConnection) url.openConnection();
@@ -69,47 +109,9 @@ public class DirectionAPI {
 //        return data;
 //    }
 
-    public String downloadUrl(String origin, String destination) {
-        String data = null;
-
-        HttpURLConnection conn = null;
-        StringBuilder jsonResults = new StringBuilder();
-
-        try {
-            StringBuilder sb = new StringBuilder(PLACES_API_BASE + OUT_JSON);
-            sb.append("?key=" + API_KEY);
-            sb.append("&components=country:tw");
-//            sb.append("&types=(cities)");
-            sb.append("&origin=" + URLEncoder.encode(origin, "utf8"));
-            sb.append("&destination=" + URLEncoder.encode(destination, "utf8"));
-
-            URL url = new URL(sb.toString());
-            conn = (HttpURLConnection) url.openConnection();
-            InputStreamReader in = new InputStreamReader(conn.getInputStream());
-
-            // Load the results into a StringBuilder
-            int read;
-            char[] buff = new char[1024];
-            while ((read = in.read(buff)) != -1) {
-                jsonResults.append(buff, 0, read);
-            }
-            data = jsonResults.toString();
-            in.close();
-        } catch (MalformedURLException e) {
-            Log.e(TAG, "Error processing Places API URL", e);
-            return data;
-        } catch (IOException e) {
-            Log.e(TAG, "Error connecting to Places API", e);
-            return data;
-        } finally {
-            if (conn != null) {
-                conn.disconnect();
-            }
-        }
-        return data;
-    }
-
     public List<List<HashMap<String,String>>> parse(JSONObject jObject) throws JSONException {
+        if (!jObject.get("status").equals("OK"))
+            return null;
 
         List<List<HashMap<String, String>>> routes = new ArrayList<List<HashMap<String,String>>>() ;
         JSONArray jRoutes = null;
@@ -152,7 +154,6 @@ public class DirectionAPI {
         }
         return routes;
     }
-
 
     /**
      * 解碼折線點的方法

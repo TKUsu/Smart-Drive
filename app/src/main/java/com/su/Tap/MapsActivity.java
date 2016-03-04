@@ -4,28 +4,36 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
-import android.widget.Button;
-import android.widget.RemoteViews;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.PlaceLikelihood;
+import com.google.android.gms.location.places.PlaceLikelihoodBuffer;
+import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -44,6 +52,7 @@ import org.w3c.dom.Text;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import static android.widget.Toast.LENGTH_SHORT;
 
@@ -53,10 +62,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Polyline polylineFinal = null;
     private AutoCompleteTextView startautoCompView = null, endautiComView = null;
     private TextView Time;
-    private Button startdelete,enddelete;
 
-    private String start = null, end = null;
-    private CharSequence place_startname = null,place_startaddress = null,place_endname = null,place_endaddress = null;
+    private LatLng start = null, end = null;
+    private CharSequence place_startname = null, place_endname = null;
     private int ButtonNumber = 0;
 
     private LocationManager mLocationmgr;
@@ -76,84 +84,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         mLocationmgr = (LocationManager) getSystemService(LOCATION_SERVICE);
 
-        startdelete = (Button)findViewById(R.id.delete);
-
         startautoCompView = (AutoCompleteTextView) findViewById(R.id.startautocomtxt);
         startautoCompView.setAdapter(new PlacesAutoCompleteAdapter(this, R.layout.autocomplete_list_item));
         startautoCompView.addTextChangedListener(startACVtxtchange);
-//        startautoCompView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-//            }
-//        });
 
         endautiComView = (AutoCompleteTextView) findViewById(R.id.endautocomtxt);
         endautiComView.setAdapter(new PlacesAutoCompleteAdapter(this, R.layout.autocomplete_list_item));
-//        endautiComView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-//            }
-//        });
-
-//        if (startautoCompView.getText().toString() == "" || startautoCompView.getText().toString() == null) {
-//            startdelete.setEnabled(false);
-//            RemoteViews remoteViews =
-//                    new RemoteViews(context.getPackageName(), R.layout.);
-//            remoteViews.setOnClickPendingIntent
-//                    (
-//                            R.id.Button01, configPendingIntent
-//                    );
-//        }
-//        else    startdelete.setEnabled(true);
-
-//        startdelete.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                start = null;
-////                polylineFinal.remove();
-//                startautoCompView.setText(null);
-//                place_startname = place_startaddress = null;
-//            }
-//        });
-//
-//        enddelete = (Button)findViewById(R.id.delete2);
-//        if (endautiComView.getText().toString() == "" || endautiComView.getText().toString() == null)
-//            enddelete.setEnabled(false);
-//        else{
-//            enddelete.setEnabled(true);
-//        }
-//        enddelete.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                end = null;
-////                polylineFinal.remove();
-//                endautiComView.setText(null);
-//                place_endname = place_endaddress = null;
-//            }
-//        });
-
-        Button SBT1 = (Button)findViewById(R.id.SearchB1);
-        SBT1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onSearch();
-                ButtonNumber = 1;
-            }
-        });
-        Button SBT2 = (Button)findViewById(R.id.SearchB2);
-        SBT2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onSearch();
-                ButtonNumber = 2;
-            }
-        });
     }
+
     @Override
     protected void onStart() {
         super.onStart();
-        if(mMap !=null && !mMap.isMyLocationEnabled())
+        if (mMap != null && !mMap.isMyLocationEnabled()) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
             mMap.setMyLocationEnabled(true);
+        }
     }
     @Override
     protected void onStop() {
@@ -194,7 +148,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private static final int REQUEST_PLACE_PICKER = 1;
-    public void onSearch(){
+    public void onSearch(View view){
+        if (view.getId() == R.id.placeB1)
+            ButtonNumber = 1;
+        else if (view.getId() == R.id.placeB2)
+            ButtonNumber = 2;
         PlacePicker.IntentBuilder intentBuilder = new PlacePicker.IntentBuilder();
         Intent intent;
         try {
@@ -209,42 +167,62 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (requestCode == REQUEST_PLACE_PICKER && resultCode == RESULT_OK) {
             // The user has selected a place. Extract the name and address.
             final Place place = PlacePicker.getPlace(data, this);
-
+            final LatLng latlng = place.getLatLng();
             final CharSequence name = place.getName();
-            final CharSequence address = place.getAddress();
             String attributions = PlacePicker.getAttributions(data);
             if (attributions == null) {
                 attributions = "";
             }
             if(ButtonNumber == 1){
                 startautoCompView.setText(name);
-                start = address.toString();
-                if (address.equals("台灣"))   start = name.toString();
+                start = latlng;
                 this.place_startname = name.toString();
-                this.place_startaddress = address.toString();
+                Toast.makeText(MapsActivity.this,start.toString(),LENGTH_SHORT).show();
             }else if (ButtonNumber == 2){
                 endautiComView.setText(name);
-                end = address.toString();
-                if (address.equals("台灣"))   end = name.toString();
+                end = latlng;
                 this.place_endname = name.toString();
-                this.place_endaddress = address.toString();
             }
         }
     }
+    //判斷是否為空值、直接輸入文字或是選取地點
     public void onNavigation(View view) {
-        if (start !=  place_startname && start != place_startaddress){
-            start = startautoCompView.getText().toString();
-        }else if (end !=  place_endname && end != place_endaddress){
-            end = endautiComView.getText().toString();
-        }
-        if (start == null || start.equals("")) {
-            Toast.makeText(MapsActivity.this, R.string.startlocationnull, LENGTH_SHORT).show();
-        } else if (end == null || end.equals("")) {
-            Toast.makeText(MapsActivity.this, R.string.endlocationnull, LENGTH_SHORT).show();
-        } else {
+        String starttmp,endtmp;
+        starttmp = startautoCompView.getText().toString();
+        endtmp = endautiComView.getText().toString();
+        if (starttmp == null || starttmp.equals("") || starttmp.equals("Your Location")) {
+            startautoCompView.setText("Your Location");
+            start = new LatLng(mLocation.getLatitude(),mLocation.getLongitude());
+            if (endtmp == null || endtmp.equals(""))
+                Toast.makeText(MapsActivity.this, R.string.endlocationnull, LENGTH_SHORT).show();
+            else {
+                if (place_endname != endtmp)
+                    end = getLatLongFromAddress(endtmp);
+                DownloadTask downloadTask = new DownloadTask();
+                downloadTask.execute();
+            }
+        }else {
+            if (place_startname != starttmp)
+                start = getLatLongFromAddress(starttmp);
+            if (place_endname != endtmp)
+                end = getLatLongFromAddress(endtmp);
             DownloadTask downloadTask = new DownloadTask();
             downloadTask.execute();
         }
+    }
+    private LatLng getLatLongFromAddress(String address){
+        LatLng p=null;
+        Geocoder geoCoder = new Geocoder(this, Locale.TAIWAN);
+        try{
+            List<Address> addresses = geoCoder.getFromLocationName(address , 1);
+            if (addresses.size() > 0)            {
+                p = new LatLng((addresses.get(0).getLatitude()),(addresses.get(0).getLongitude()));
+                return p;
+            }
+        }catch(Exception e){
+            Toast.makeText(getApplicationContext(), "El servicio de Google Maps no se encuentra disponible.\n"
+                    + "Intente ms tarde.", Toast.LENGTH_LONG).show();
+        }return p;
     }
 
     private TextWatcher startACVtxtchange = new TextWatcher() {
@@ -271,7 +249,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         enableLocationUpdate();
         Toast.makeText(MapsActivity.this, "Map's my-location-layer is start", LENGTH_SHORT).show();
     }
-
     @Override
     public void deactivate() {
         mLocationchangeListener = null;
@@ -287,7 +264,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         this.mLocation = location;
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 15));
     }
-
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
         //手機定位功能狀態更新時執行的method
@@ -305,14 +281,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         Toast.makeText(MapsActivity.this, str, LENGTH_SHORT).show();
     }
-
     @Override
     public void onProviderEnabled(String provider) {
         //手機定位功能開啟時執行
         Toast.makeText(MapsActivity.this, provider + "Locate function is open", LENGTH_SHORT).show();
         enableLocationUpdate();
     }
-
     @Override
     public void onProviderDisabled(String provider) {
         //手機定位功能關閉時執行
@@ -340,7 +314,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Toast.makeText(MapsActivity.this, "Use network locate", LENGTH_SHORT).show();
         }
     }
-
     private void disableLocationUpdate(){
         if (Build.VERSION.SDK_INT>=23 && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -362,13 +335,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private class DownloadTask extends AsyncTask<Void, Void, String> {
         // Downloading data in non-ui thread
         @Override
-        protected String doInBackground(Void... params) {
+        protected String doInBackground(Void... Void) {
             // For storing data from web service
             String data = "";  try {
                 // Fetching the data from web service
-                data = DctAPI.downloadUrl(start,end);
-                if (data == null)
-                    Log.d("Error data", data);
+//                if (startlocation == null)
+                    data = DctAPI.downloadUrl(start,end);
             } catch (Exception e) {
                 Log.d("Background Task", e.toString());
             }
@@ -396,13 +368,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             try {
 //                Log.e(MapsActivity.class.getName(), String.valueOf(jsonData[0]));
                 jObject = new JSONObject(jsonData[0]);
-                String status = jObject.getString("status");
-                if (!status.equals("OK"))
-                    Toast.makeText(MapsActivity.this,"NOT_FOUND",Toast.LENGTH_SHORT).show();
                 // Starts parsing data
                 routes = DctAPI.parse(jObject);
+                Toast.makeText(MapsActivity.this,routes.toString(),Toast.LENGTH_SHORT).show();
+                if (routes == null)
+                    Toast.makeText(MapsActivity.this,"NOT_FOUND",Toast.LENGTH_SHORT).show();
             } catch (Exception e) {
                 e.printStackTrace();
+                Log.e("error",e.getMessage());
             }
             return routes;
         }
@@ -413,35 +386,38 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             PolylineOptions lineOptions = null;
             MarkerOptions markerOptions = new MarkerOptions();
             int i,j;
+            try {
+                // Traversing through all the routes
+                for (i = 0; i < result.size(); i++) {
+                    points = new ArrayList<LatLng>();
+                    lineOptions = new PolylineOptions();
 
-            // Traversing through all the routes
-            for (i = 0; i < result.size(); i++) {
-                points = new ArrayList<LatLng>();
-                lineOptions = new PolylineOptions();
+                    // Fetching i-th route
+                    List<HashMap<String, String>> path = result.get(i);  // Fetching all the points in i-th route
+                    for (j = 0; j < path.size(); j++) {
+                        HashMap<String, String> point = path.get(j);
 
-                // Fetching i-th route
-                List<HashMap<String, String>> path = result.get(i);  // Fetching all the points in i-th route
-                for (j = 0; j < path.size(); j++) {
-                    HashMap<String, String> point = path.get(j);
+                        double lat = Double.parseDouble(point.get("lat"));
+                        double lng = Double.parseDouble(point.get("lng"));
+                        LatLng position = new LatLng(lat, lng);
+                        points.add(position);
+                        if (i == 0 && j == 0)
+                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 15));
+                    }
 
-                    double lat = Double.parseDouble(point.get("lat"));
-                    double lng = Double.parseDouble(point.get("lng"));
-                    LatLng position = new LatLng(lat, lng);
-                    points.add(position);
-                    if (i==0 && j==0)
-                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position,15));
+                    // Adding all the points in the route to LineOptions
+                    lineOptions.addAll(points);
+                    lineOptions.width(6);  //導航路徑寬度
+                    lineOptions.color(Color.BLUE); //導航路徑顏色
                 }
-
-                // Adding all the points in the route to LineOptions
-                lineOptions.addAll(points);
-                lineOptions.width(6);  //導航路徑寬度
-                lineOptions.color(Color.BLUE); //導航路徑顏色
+                // Drawing polyline in the Google Map for the i-th route
+                if (lineOptions != null)
+                    polylineFinal = mMap.addPolyline(lineOptions);
+                else
+                    Log.e(MapsActivity.class.getName(), "Error List size == 0");
+            }catch (NullPointerException e){
+                Log.e(MapsActivity.class.getName(),e.getMessage());
             }
-            // Drawing polyline in the Google Map for the i-th route
-            if(lineOptions != null)
-                polylineFinal = mMap.addPolyline(lineOptions);
-            else
-                Log.e(MapsActivity.class.getName(), "Error List size == 0");
         }
     }
 }

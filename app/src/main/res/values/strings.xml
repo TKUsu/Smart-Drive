@@ -7,6 +7,7 @@
     <string name="title_activity_maps">Tap</string>
     <string name="endlocationnull">The end location is null!!</string>
     <string name="startlocationnull">The start location is null!!</string>
+    <string name="failure_position">Get failure the position the former</string>
 
     <string name="LOG_TAG">ExampleApp</string>
 </resources>

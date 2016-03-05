@@ -70,4 +70,6 @@ class PlacesAutoCompleteAdapter extends ArrayAdapter<String> implements Filterab
 
         return filter;
     }
+
+
 }

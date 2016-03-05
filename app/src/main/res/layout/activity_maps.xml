@@ -9,7 +9,8 @@
         android:layout_width="match_parent"
         android:layout_height="100dp"
         android:id="@+id/searchBar"
-        android:background="#3d5afe">
+        android:background="#3d5afe"
+        android:alpha="0.8">
 
         <LinearLayout
             android:orientation="vertical"

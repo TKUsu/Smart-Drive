@@ -23,7 +23,7 @@ import java.util.List;
  * Created by Nicole on 2015/12/17.
  */
 public class DirectionAPI {
-    private static final String TAG = PlaceAPI.class.getSimpleName();
+    private static final String TAG = DirectionAPI.class.getSimpleName();
 
     private static final String PLACES_API_BASE = "https://maps.googleapis.com/maps/api/directions";
     private static final String OUT_JSON = "/json";

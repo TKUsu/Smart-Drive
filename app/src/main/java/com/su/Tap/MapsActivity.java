@@ -121,7 +121,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         endautiComView = (AutoCompleteTextView) findViewById(R.id.endautocomtxt);
         endautiComView.setAdapter(new PlacesAutoCompleteAdapter(this, R.layout.autocomplete_list_item));
-        startautoCompView.addTextChangedListener(endACVtxtchange);
+        endautiComView.addTextChangedListener(endACVtxtchange);
         endautiComView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -197,12 +197,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             location = mLocationmgr.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         if (location != null) {
             onLocationChanged(location);
+            if(ButtonNumber == 0)
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(),location.getLongitude()), 18));
+            else
+                mMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
         } else
             Toast.makeText(MapsActivity.this, R.string.failure_position, LENGTH_SHORT).show();
-        if(ButtonNumber == 0)
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(),location.getLongitude()), 18));
-        else
-            mMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
     }
     @Override
     public boolean onMarkerClick(Marker marker) {
@@ -249,19 +249,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 startMarker = mMap.addMarker(new MarkerOptions()
                                 .title(name.toString()).position(start)
                                 .snippet("Address : " + address.toString()
-                                    + "\n" + "Phone number : " + number.toString()
-                                    + "\n" + "Place type : " + Type)
-                        );
+                                        + "\n" + "Phone number : " + number.toString()
+                                        + "\n" + "Place type : " + Type)
+                );
+                mMap.animateCamera(CameraUpdateFactory.newLatLng(start));
             }else if (ButtonNumber == 2){
                 endautiComView.setText(name);
                 end = latlng;
                 this.place_endname = name.toString();
                 endMarker = mMap.addMarker(new MarkerOptions()
-                                .title(name.toString()).position(start)
+                                .title(name.toString()).position(end)
                                 .snippet("Address : " + address.toString()
                                         + "\n" + "Phone number : " + number.toString()
                                         + "\n" + "Place type : " + Type)
                 );
+                mMap.animateCamera(CameraUpdateFactory.newLatLng(end));
             }
         }
     }

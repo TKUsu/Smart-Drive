@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
+
     dexOptions {
         javaMaxHeapSize "4g"
     }
@@ -14,10 +15,19 @@ android {
         versionCode 1
         versionName "1.0"
     }
+    signingConfigs {
+        release {
+            storeFile file('AndroidKey.jks')
+            storePassword '02201596'
+            keyAlias 'Tap'
+            keyPassword '02201596'
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }

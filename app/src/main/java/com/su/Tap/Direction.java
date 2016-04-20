@@ -127,51 +127,19 @@ public class Direction extends AsyncTask<Void, Void, String> {
         }
     }
 
-    public void setPolyline(int color, int Width){
-        this.dcolor = color;
-        this.lineWidth = Width;
+    public void setPolyline(int color, int width){
+        if (lineList.isEmpty()) {
+            this.dcolor = color;
+            this.lineWidth = width;
+        }else
+        Log.e("Direction","Direction isn't to set polyline color & Width");
     }
 
-    public void setPolyLineColor(int color){
-        if (getLineList(R.integer.LINE_LIST,null))
-            polyline.setColor(color);
+    public void deletePolyLine(){
+        if (lineList.isEmpty())
+            polyline.remove();
         else
             Log.e("Direction",".................");
     }
 
-    public void deletePolyLine(){
-        polyline.remove();
-    }
-
-    public int searchLineList(int i, String s){
-        /**
-         *  1:list size
-         *  2:search string
-         */
-        switch (i){
-            case 1:
-                return lineList.size();
-            case 2:
-                return lineList.indexOf(s);
-        }
-        return -1;
-    }
-
-    public boolean getLineList(int i, String s){
-        /**
-         *  0:list empty
-         *  3:have s string
-         *  4:delete s string
-         */
-        switch (i){
-            case 0:
-                return lineList.isEmpty();
-            case 3:
-                return lineList.contains(s);
-            case 4:
-                return lineList.remove(s);
-            default:
-                return false;
-        }
-    }
 }

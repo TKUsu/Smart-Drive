@@ -182,7 +182,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setMyLocationEnabled(true);
         mMap.setTrafficEnabled(false);
         mMap.setOnMarkerClickListener(this);
-        mMap.setPadding(0, 120, 0, 0);
+        mMap.setPadding(0, 240, 0, 0);
 
         if (Build.VERSION.SDK_INT >= 23 && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
@@ -232,23 +232,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return marker;
     }
 
+    private int PRange,SRange,DRange;
     public void OnDownButtonClick(View view) {
         /**
-         *      1 :Map padding ride up 0 to 120
+         *      1 :Map padding ride up 0 to 240
          *      2 :Search bar ride up -200 to 0
          *      3 :Button down ride down -10 to -100
          */
-        myAnimation(120, 200, -100, 0, -200, -10);
+        if(view.getId() == R.id.NavigationB) {
+            PRange = view.getHeight();
+            SRange = view.getHeight();
+            DRange = view.getHeight();
+        }
+        myAnimation(240, SRange, -DRange, 0, -200, -10);
         mButtonDown.setTranslationX(-100);
         mRouteTxt.setY(DownX);
     }
     private void SearchBarRideUp() {
         /**
-         *      1 :Map padding ride up 120 to 0
+         *      1 :Map padding ride up 240 to 0
          *      2 :Search bar ride up 0 to -200
-         *      3 :Button down ride down -80 to -10
+         *      3 :Button down ride down -100 to -10
+         *      myAnimation((1,2,3).translation,(1,2,3).start point)
          */
-        myAnimation(-120, -200, 70, 100, 0, -80);
+        myAnimation(-240, -SRange, DRange, 100, 0, -100);
         mButtonDown.setTranslationX(mSearchBar.getWidth() / 2 - 20);
         DownX = mRouteTxt.getY();
         mRouteTxt.setY(0);
@@ -358,9 +365,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             direction.execute();
         }
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mLatLng(), 18));
-        direction.setPolyLineColor(Color.GRAY);
     }
 
+    private void ShowPercent(){
+
+    }
     /**
      * getLatLongFromAddress
      */

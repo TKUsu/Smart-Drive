@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="LINE_LIST">0</integer>
+    <integer name="LINE_LIST_SIZE">1</integer>
+    <integer name="LINE_LIST_SEARCH_STRING">2</integer>
+    <integer name="LINE_LIST_HAVE_STRING">3</integer>
+    <integer name="LINE_LIST_DELETE_STRING">4</integer>
+</resources>

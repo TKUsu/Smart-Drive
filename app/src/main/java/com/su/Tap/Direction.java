@@ -4,6 +4,7 @@ package com.su.Tap;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
@@ -20,12 +21,14 @@ public class Direction extends AsyncTask<Void, Void, String> {
     // Downloading data in non-ui thread
 
     DirectionAPI DctAPI = new DirectionAPI();
+    public ParserTask parserTask = new ParserTask();
+
     private LatLng start, end;
     private GoogleMap dMap;
-    private Polyline polyline;
 
-    private int dcolor = Color.BLUE;
-    private int lineWidth = 10;
+    public static int dcolor = Color.BLUE;
+    public static int lineWidth = 10;
+
     private ArrayList lineList = new ArrayList<LatLng>();
     private PolylineOptions lineOptions;
 
@@ -33,12 +36,6 @@ public class Direction extends AsyncTask<Void, Void, String> {
         this.start = start;
         this.end = end;
         this.dMap = mMap;
-    }
-
-    public Direction(Polyline polyline) {
-        this.polyline = polyline;
-        Log.e("Direction","2");
-
     }
 
     @Override
@@ -59,17 +56,17 @@ public class Direction extends AsyncTask<Void, Void, String> {
     @Override
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
-        ParserTask parserTask = new ParserTask();
         // Invokes the thread for parsing the JSON data
         parserTask.execute(result);
-        polyline = parserTask.getPolyLine();
     }
 
     /** 解析JSON格式 **/
-    class ParserTask extends
+    public class ParserTask extends
             AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
+        Polyline dPolyline = null;
+
+
         // Parsing the data in non-ui thread
-        Polyline Ppolyline;
         @Override
         protected List<List<HashMap<String, String>>> doInBackground(
                 String... jsonData) {
@@ -113,17 +110,25 @@ public class Direction extends AsyncTask<Void, Void, String> {
                     lineList = points;
                 }
                 // Drawing polyline in the Google Map for the i-th route
-                polyline = dMap.addPolyline(lineOptions);
-                this.Ppolyline = polyline;
-                polyline.setColor(Color.GRAY);
-
+                dPolyline = dMap.addPolyline(lineOptions);
             }catch (NullPointerException e){
                 Log.e(MapsActivity.class.getName(),e.getMessage());
             }
         }
 
-        private Polyline getPolyLine(){
-            return Ppolyline;
+//        public Polyline getPolyLine(){
+//            try {
+//                return Ppolyline;
+//            }catch(NullPointerException e) {
+//                Log.e(Direction.class.getName(),e.getMessage());
+//                return null;
+//            }
+//        }
+        public void deletePolyLine(){
+            if (lineList.isEmpty())
+                dPolyline.remove();
+            else
+                Log.e("Direction",".................");
         }
     }
 
@@ -135,11 +140,6 @@ public class Direction extends AsyncTask<Void, Void, String> {
         Log.e("Direction","Direction isn't to set polyline color & Width");
     }
 
-    public void deletePolyLine(){
-        if (lineList.isEmpty())
-            polyline.remove();
-        else
-            Log.e("Direction",".................");
-    }
+
 
 }

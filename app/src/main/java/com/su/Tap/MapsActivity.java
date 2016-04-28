@@ -43,6 +43,7 @@ import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -54,12 +55,11 @@ import static android.widget.Toast.LENGTH_SHORT;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
-        GoogleMap.OnMarkerClickListener {
+        GoogleMap.OnMarkerClickListener{
 
     private Direction direction;
 
     private AutoCompleteTextView startautoCompView = null, endautiComView = null;
-    private TextView mRouteTxt = null;
     private LinearLayout mSearchBar;
     private Button mButtonDown;
 
@@ -97,7 +97,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Theme();
 
         mButtonDown = (Button) findViewById(R.id.down);
-        mRouteTxt = (TextView) findViewById(R.id.textView);
         mSearchBar = (LinearLayout) findViewById(R.id.searchBar);
         mLocationmgr = (LocationManager) getSystemService(LOCATION_SERVICE);
 
@@ -182,7 +181,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setMyLocationEnabled(true);
         mMap.setTrafficEnabled(false);
         mMap.setOnMarkerClickListener(this);
-        mMap.setPadding(0, 240, 0, 0);
+        mMap.setPadding(0, 200, 0, 0);
 
         if (Build.VERSION.SDK_INT >= 23 && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
@@ -214,65 +213,67 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mUis.setMapToolbarEnabled(false);
         return false;
     }
+
     private Marker setMapMarker(String name, String address, LatLng latLng, String number, String Type) {
-        String markertxt = "";
-        if (address != null)
-            markertxt += "Address : " + address + "\n";
-        if (number != null)
-            markertxt += "Phone number : " + number + "\n";
-        if (Type != null)
-            markertxt += "Place type : " + Type;
-        Marker marker = mMap.addMarker(new MarkerOptions()
-                        .title(name)
-                        .position(latLng)
-                        .snippet(markertxt)
-                        .flat(true)
-        );
-        mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-        return marker;
+        if(ButtonNumber == 1) {
+            String markertxt = "";
+            if (address != null)
+                markertxt += "Address : " + address + "\n";
+            if (number != null)
+                markertxt += "Phone number : " + number + "\n";
+            if (Type != null)
+                markertxt += "Place type : " + Type;
+            Marker marker = mMap.addMarker(new MarkerOptions()
+                            .title(name)
+                            .position(latLng)
+                            .snippet(markertxt)
+                            .flat(true)
+            );
+            mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+            return marker;
+        }return null;
     }
 
     private int PRange,SRange,DRange;
     public void OnDownButtonClick(View view) {
         /**
-         *      1 :Map padding ride up 0 to 240
+         *      1 :Map padding ride up 0 to 200
          *      2 :Search bar ride up -200 to 0
          *      3 :Button down ride down -10 to -100
          */
-        if(view.getId() == R.id.NavigationB) {
+        if(view.getId() == R.id.down) {
             PRange = view.getHeight();
             SRange = view.getHeight();
             DRange = view.getHeight();
         }
-        myAnimation(240, SRange, -DRange, 0, -200, -10);
+        myAnimation(0,200,-200,200,-10,-90);
         mButtonDown.setTranslationX(-100);
-        mRouteTxt.setY(DownX);
+//        direction.deletePolyLine();
+        direction.parserTask.deletePolyLine();
     }
     private void SearchBarRideUp() {
         /**
-         *      1 :Map padding ride up 240 to 0
+         *      1 :Map padding ride up 200 to 0
          *      2 :Search bar ride up 0 to -200
          *      3 :Button down ride down -100 to -10
          *      myAnimation((1,2,3).translation,(1,2,3).start point)
          */
-        myAnimation(-240, -SRange, DRange, 100, 0, -100);
+        myAnimation(200,-200,0,-200,-100,90);
         mButtonDown.setTranslationX(mSearchBar.getWidth() / 2 - 20);
-        DownX = mRouteTxt.getY();
-        mRouteTxt.setY(0);
     }
-    private void myAnimation(int PRange, int SRange, int DRange, int Ptemp, int Stemp, int Dtemp) {
+    private void myAnimation(int Pstart, int PRange, int Sstart, int SRange, int Dstart, int DRange) {
         PRange = PRange / 10;
         SRange = SRange / 10;
         DRange = DRange / 10;
         int i = 0;
         Handler handler1 = new Handler();
         while (i<10){
-            Ptemp += PRange;
-            Stemp += SRange;
-            Dtemp += DRange;
-            final int finalPtemp = Ptemp;
-            final int finalStemp = Stemp;
-            final int finalDtemp = Dtemp;
+            Pstart += PRange;
+            Sstart += SRange;
+            Dstart += DRange;
+            final int finalPtemp = Pstart;
+            final int finalStemp = Sstart;
+            final int finalDtemp = Dstart;
             handler1.postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -364,7 +365,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             direction = new Direction(start, end, mMap);
             direction.execute();
         }
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mLatLng(), 18));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(start, 18));
+//        mPolyLine = direction.parserTask.getPolyLine();
+        try {
+//            mPolyline.setColor(Color.BLACK);
+            direction.dcolor = Color.BLACK;
+        }catch (NullPointerException e){
+            Toast.makeText(MapsActivity.this,e.toString(),Toast.LENGTH_LONG);
+        }
     }
 
     private void ShowPercent(){
@@ -552,5 +560,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
         }
     }
+
 
 }

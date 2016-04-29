@@ -125,21 +125,21 @@ public class Direction extends AsyncTask<Void, Void, String> {
 //            }
 //        }
         public void deletePolyLine(){
-            if (lineList.isEmpty())
+            try {
                 dPolyline.remove();
-            else
-                Log.e("Direction",".................");
+            }catch (NullPointerException e) {
+                Log.e("Direction", e.toString());
+            }
         }
     }
-
-    public void setPolyline(int color, int width){
-        if (lineList.isEmpty()) {
-            this.dcolor = color;
-            this.lineWidth = width;
-        }else
-        Log.e("Direction","Direction isn't to set polyline color & Width");
-    }
-
-
+//
+//    public void setPolyline(int color, int width){
+//        try{
+//        this.dcolor = color;
+//            this.lineWidth = width;
+//        }catch (NullPointerException e) {
+//            Log.e("Direction", "Direction isn't to set polyline color & Width");
+//        }
+//    }
 
 }

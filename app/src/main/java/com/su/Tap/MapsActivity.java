@@ -1,8 +1,10 @@
 package com.su.Tap;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
@@ -181,7 +183,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setMyLocationEnabled(true);
         mMap.setTrafficEnabled(false);
         mMap.setOnMarkerClickListener(this);
-        mMap.setPadding(0, 200, 0, 0);
+        mMap.setPadding(0, 200, 0, getNavigationHeight(this));
 
         if (Build.VERSION.SDK_INT >= 23 && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
@@ -338,15 +340,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         String starttmp, endtmp;
         starttmp = startautoCompView.getText().toString();
         endtmp = endautiComView.getText().toString();
-        if (!startautoCompView.getText().equals("")) {
+        if (!starttmp.equals("")) {
             startautoCompView.setHint("Start Location");
             startautoCompView.setHintTextColor(0x454545);
-        }
-        if (starttmp.equals("")) {
+        }else if (starttmp.equals("")) {
             startLocationUpdates();
             startautoCompView.setHint("Your Location...");
             startautoCompView.setHintTextColor(Color.BLACK);
-            start = mLatLng();
+            try {
+                start = mLatLng();
+            }catch (NullPointerException e){
+                Toast.makeText(MapsActivity.this, "Your locate isn't found,please check GPS is open", LENGTH_SHORT).show();
+            }
             if (endtmp.equals(""))
                 Toast.makeText(MapsActivity.this, R.string.endlocationnull, LENGTH_SHORT).show();
             else {
@@ -555,11 +560,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
                     WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
             // Translucent navigation bar
-            window.setFlags(
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+//            window.setFlags(
+//                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
+//                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
         }
     }
 
+    private int getNavigationHeight(Context context){
+        Resources resources = context.getResources();
+        int resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            return resources.getDimensionPixelSize(resourceId);
+        }
+        return 0;
+    }
 
+    private int getStatusHeight(Context context,int type){
+        Resources resources = context.getResources();
+        int resourceId = resources.getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            if (type == 0)
+                return resources.getDimensionPixelSize(resourceId)
+                        + mSearchBar.getHeight();
+            else if (type ==1)
+                return resources.getDimensionPixelSize(resourceId)
+                        + mSearchBar.getHeight();
+        }
+        return 0;
+    }
 }

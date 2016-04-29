@@ -8,9 +8,12 @@ import android.database.sqlite.SQLiteOpenHelper;
  * Created by Nicole on 2016/4/28.
  */
 public class SQLiteHelper extends SQLiteOpenHelper {
-    private static final String DATABASE_NAME = "todo";
+
+    private static final String DATABASE_NAME = "roadDB";
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_TABLE = "todos";
+
+
 
     public SQLiteHelper(Context context) {
         //透過建構子MyDBHelper直接呼叫父類別建構子來建立參數的資料庫
@@ -23,6 +26,11 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+
+
+//        dbHelper = new SQLiteHelper(this);
+//        db = dbHelper.getWritableDatabase();
+
         db.execSQL("CREATE TABLE users (" +
                 "_id INTEGER PRIMARY KEY AUTOINCREMENT" +
                 "name TEXT NO NULL" +
@@ -31,6 +39,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+        db.execSQL("DROP TABLE IF EXISTS users");
+        onCreate(db);
     }
 }

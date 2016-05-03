@@ -1,5 +1,7 @@
 package com.su.Tap;
 
+import android.support.design.widget.FloatingActionButton;
+
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
@@ -15,8 +17,6 @@ import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -45,15 +45,12 @@ import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
-import static android.widget.Toast.LENGTH_SHORT;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
@@ -68,13 +65,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LatLng start = null, end = null;
     private CharSequence place_startname = null, place_endname = null;
     private ArrayList<Marker> markers = new ArrayList<>();
+    private SQLiteHelper sqLiteHelper;
 
     private int ButtonNumber = 0;
     private float DownX = 0;
     private GoogleMap mMap;
     private UiSettings mUis;
     private LocationManager mLocationmgr;
-    private Location mLocation;
+    private Location mLocation = null;
     /**
      * Tracks the status of the location updates request. Value changes when the user presses the
      * Start Updates and Stop Updates buttons.
@@ -86,6 +84,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected String mLastUpdateTime;
     protected GoogleApiClient mGoogleApiClient;
     protected LocationRequest mLocationRequest;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,6 +131,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 markers.add(setMapMarker(s, null, end, null, null));
             }
         });
+
+        sqLiteHelper = new SQLiteHelper(this);
+        sqLiteHelper.setDB(sqLiteHelper.getWritableDatabase());
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    sqLiteHelper.checkout("insert", new LatLng(121,125));
+                }catch (NullPointerException e) {
+                    toast(e.toString());
+                }
+            }
+        });
     }
 
     @Override
@@ -173,6 +187,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.mMap = googleMap;
+        Log.i(TAG, "On Map Ready");
 
         mUis = mMap.getUiSettings();
         mUis.setMyLocationButtonEnabled(true);
@@ -185,15 +200,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setOnMarkerClickListener(this);
         mMap.setPadding(0, 200, 0, getNavigationHeight(this));
 
-        if (Build.VERSION.SDK_INT >= 23 && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-            return;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+                return;
+        }
         if (mLocation != null) {
+            Log.i(TAG, "Fist Location");
             if (ButtonNumber == 0)
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mLatLng(), 18));
             else
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(mLatLng()));
         } else {
+            Log.i(TAG, "Get Last Known Location");
             Location location = mLocationmgr.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             if (location == null)
                 location = mLocationmgr.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
@@ -203,7 +222,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 else
                     mMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
             } else
-                Toast.makeText(MapsActivity.this, R.string.failure_position, LENGTH_SHORT).show();
+                toast(String.valueOf(R.string.failure_position));
         }
     }
 
@@ -217,23 +236,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private Marker setMapMarker(String name, String address, LatLng latLng, String number, String Type) {
-        if(ButtonNumber == 1) {
-            String markertxt = "";
-            if (address != null)
-                markertxt += "Address : " + address + "\n";
-            if (number != null)
-                markertxt += "Phone number : " + number + "\n";
-            if (Type != null)
-                markertxt += "Place type : " + Type;
-            Marker marker = mMap.addMarker(new MarkerOptions()
-                            .title(name)
-                            .position(latLng)
-                            .snippet(markertxt)
-                            .flat(true)
-            );
-            mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-            return marker;
-        }return null;
+        String markertxt = "";
+        if (address != null)
+            markertxt += "Address : " + address + "\n";
+        if (number != null)
+            markertxt += "Phone number : " + number + "\n";
+        if (Type != null)
+            markertxt += "Place type : " + Type;
+        Marker marker = mMap.addMarker(new MarkerOptions()
+                .title(name)
+                .position(latLng)
+                .snippet(markertxt)
+                .flat(true));
+        mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+        return marker;
     }
 
     private int PRange,SRange,DRange;
@@ -350,10 +366,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             try {
                 start = mLatLng();
             }catch (NullPointerException e){
-                Toast.makeText(MapsActivity.this, "Your locate isn't found,please check GPS is open", LENGTH_SHORT).show();
+                toast("Your locate isn't found,please check GPS is open");
             }
             if (endtmp.equals(""))
-                Toast.makeText(MapsActivity.this, R.string.endlocationnull, LENGTH_SHORT).show();
+                toast(String.valueOf(R.string.endlocationnull));
             else {
                 if (!place_endname.equals(endtmp))
                     end = getLatLongFromAddress(endtmp);
@@ -376,7 +392,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //            mPolyline.setColor(Color.BLACK);
             direction.dcolor = Color.BLACK;
         }catch (NullPointerException e){
-            Toast.makeText(MapsActivity.this,e.toString(),Toast.LENGTH_LONG);
+            toast(e.toString());
         }
     }
 
@@ -396,8 +412,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 return p;
             }
         } catch (Exception e) {
-            Toast.makeText(getApplicationContext(), "El servicio de Google Maps no se encuentra disponible.\n"
-                    + "Intente ms tarde.", Toast.LENGTH_LONG).show();
+            toast("El servicio de Google Maps no se encuentra disponible.\n"
+                    + "Intente ms tarde.");
         }
         return p;
     }
@@ -454,7 +470,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     protected void createLocationRequest() {
         mLocationRequest = new LocationRequest();
-
+        Log.i(TAG, "Create Location Request");
         // Sets the desired interval for active location updates. This interval is
         // inexact. You may not receive updates at all if no location sources are available, or
         // you may receive them slower than requested. You may also receive updates faster than
@@ -475,12 +491,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // The final argument to {@code requestLocationUpdates()} is a LocationListener
         // (http://developer.android.com/reference/com/google/android/gms/location/LocationListener.html).
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        Log.i(TAG, "Connected to GoogleApiClient");
     }
 
     /**
      * Removes location updates from the FusedLocationApi.
      */
     protected void stopLocationUpdates() {
+        Log.i(TAG, "Stop Location Update");
         // It is a good practice to remove location requests when the activity is in a paused or
         // stopped state. Doing so helps battery performance and is especially
         // recommended in applications that request frequent location updates.
@@ -534,6 +552,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onLocationChanged(Location location) {
+        Log.i(TAG, "On Location Changed");
         mLocation = location;
         mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
     }
@@ -587,5 +606,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         + mSearchBar.getHeight();
         }
         return 0;
+    }
+    public void toast(String tmp){
+        try {
+            Toast.makeText(MapsActivity.this, tmp, Toast.LENGTH_LONG).show();
+        }catch (NullPointerException e){
+            Log.e("MapActivity toast",e.toString());
+        }
     }
 }

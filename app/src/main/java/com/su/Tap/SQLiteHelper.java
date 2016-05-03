@@ -1,45 +1,98 @@
 package com.su.Tap;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+import android.view.View;
+import android.widget.Toast;
+
+import com.google.android.gms.maps.model.LatLng;
 
 /**
  * Created by Nicole on 2016/4/28.
  */
 public class SQLiteHelper extends SQLiteOpenHelper {
 
+    private MapsActivity main;
+
     private static final String DATABASE_NAME = "roadDB";
     private static final int DATABASE_VERSION = 1;
-    private static final String DATABASE_TABLE = "todos";
-
-
+    private SQLiteDatabase db;
 
     public SQLiteHelper(Context context) {
         //透過建構子MyDBHelper直接呼叫父類別建構子來建立參數的資料庫
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
-    public SQLiteHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
-        super(context, name, factory, version);
-    }
-
     @Override
     public void onCreate(SQLiteDatabase db) {
-
-
-//        dbHelper = new SQLiteHelper(this);
-//        db = dbHelper.getWritableDatabase();
-
-        db.execSQL("CREATE TABLE users (" +
-                "_id INTEGER PRIMARY KEY AUTOINCREMENT" +
-                "name TEXT NO NULL" +
-                "age REAL NO NULL)");
+        db.execSQL("CREATE TABLE roadDBs (" +
+                "_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                " lat DOUBLE," +
+                " lng DOUBLE)");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS users");
         onCreate(db);
+    }
+
+    public void setDB(SQLiteDatabase db){
+        this.db = db;
+    }
+
+    public void checkout(String temp, LatLng latLng) {
+        ContentValues cv;
+//        int count, id;
+        switch (temp) {
+            case "insert":
+                long idtemp;
+                cv = new ContentValues();
+                cv.put("lat", latLng.latitude);
+                cv.put("lng", latLng.longitude);
+                idtemp = db.insert("roadDBs", null, cv);
+                Log.e("DB","新增記錄成功" + idtemp);
+                break;
+            case "search":
+                SqlQuery("SELECT * FROM " + "roadDBs");
+                break;
+//                case "update":
+//                    id = Integer.parseInt(tid.getText().toString());
+//                    cv = new ContentValues();
+//                    cv.put("score", Double.parseDouble(score.getText().toString()));
+//                    count = db.update("road", cv, "_id=" + id, null);
+//                    output.setText("更新記錄成功" + count);
+//                    break;
+
+//                case "delete":
+//                    id = Integer.parseInt(tid.getText().toString());
+//                    count = db.delete("road" +
+//                            "", "_id=" + id, null);
+//                    output.setText("刪除記錄成功" + count);
+//                    break;
+        }
+    }
+
+    public void SqlQuery(String sql) {
+        String[] colNames;
+        String str = "";
+        Cursor c = db.rawQuery(sql, null);
+        colNames = c.getColumnNames();
+        for (int i = 0; i < colNames.length; i++) {
+            str += colNames[i] + "\t\t";
+        }
+        str += "\n";
+        c.moveToFirst();
+        for (int i = 0; i < c.getCount(); i++) {
+            str += c.getString(0) + "\t";
+            str += c.getString(1) + "\t";
+            str += c.getString(2) + "\n";
+            c.moveToNext();
+        }
+        Log.e("Search Road BD : ",str.toString());
     }
 }

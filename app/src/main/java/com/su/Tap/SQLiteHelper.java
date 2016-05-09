@@ -45,7 +45,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         this.db = db;
     }
 
-    public void checkout(String temp, LatLng latLng) {
+    public void sql(String temp, LatLng latLng) {
         ContentValues cv;
 //        int count, id;
         switch (temp) {

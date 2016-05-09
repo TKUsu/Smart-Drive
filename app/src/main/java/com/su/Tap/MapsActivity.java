@@ -1,5 +1,8 @@
 package com.su.Tap;
 
+import android.app.Service;
+import android.os.IBinder;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 
 import android.Manifest;
@@ -42,6 +45,8 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -117,7 +122,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 String s = (String) parent.getItemAtPosition(position);
                 start = getLatLongFromAddress(s);
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(start));
-                markers.add(setMapMarker(s, null, start, null, null));
+                markers.add(setMapMarker(0,s, null, start, null, null));
             }
         });
 
@@ -129,7 +134,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 String s = (String) parent.getItemAtPosition(position);
                 end = getLatLongFromAddress(s);
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(end));
-                markers.add(setMapMarker(s, null, end, null, null));
+                markers.add(setMapMarker(1,s, null, end, null, null));
             }
         });
 
@@ -141,12 +146,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onClick(View v) {
                 try {
                     if (!startstop) {
-                        sqLiteHelper.checkout("insert", new LatLng(121, 125));
                         Intent intent = new Intent(MapsActivity.this, SQLService.class);
                         startService(intent);
                         startstop = true;
-                    }
-                    if(startstop){
+                    }else if(startstop){
                         Intent intent = new Intent(MapsActivity.this, SQLService.class);
                         stopService(intent);
                         startstop = false;
@@ -161,7 +164,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View v) {
                 try {
-                    mMap.animateCamera(CameraUpdateFactory.newLatLng(mLatLng()));
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mLatLng(),16));
                 }catch (NullPointerException e) {
                     Log.e("Location Animator ",e.toString());
                 }
@@ -239,7 +242,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 location = mLocationmgr.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
             if (location != null) {
                 if (ButtonNumber == 0)
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 18));
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 16));
                 else
                     mMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
             } else
@@ -256,7 +259,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return false;
     }
 
-    private Marker setMapMarker(String name, String address, LatLng latLng, String number, String Type) {
+    private Marker setMapMarker(int i,String name, String address, LatLng latLng, String number, String Type) {
+        BitmapDescriptor markerColor = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED);
+        if (i == 0)
+            markerColor = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE);
+        else if (i == 1)
+            markerColor = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE);
         String markertxt = "";
         if (address != null)
             markertxt += "Address : " + address + "\n";
@@ -268,8 +276,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .title(name)
                 .position(latLng)
                 .snippet(markertxt)
-                .flat(true));
-        mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+                .flat(true)
+                .icon(markerColor));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,16));
         return marker;
     }
 
@@ -285,7 +294,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             SRange = view.getHeight();
             DRange = view.getHeight();
         }
-        myAnimation(0,200,-200,200,-10,-90);
+        Log.e("Test:", "PRange = "+String.valueOf(PRange)+
+                "SRange = "+String.valueOf(SRange)+"DRange = "+String.valueOf(DRange));
+        myAnimation(0, 200, -200, 200, -10, -90);
         mButtonDown.setTranslationX(-100);
 //        direction.deletePolyLine();
         direction.parserTask.deletePolyLine();
@@ -360,12 +371,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 startautoCompView.setText(name);
                 start = latlng;
                 this.place_startname = name;
-                markers.add(setMapMarker(name, address, start, number, Type));
+                markers.add(setMapMarker(0,name, address, start, number, Type));
             } else if (ButtonNumber == 2) {
                 endautiComView.setText(name);
                 end = latlng;
                 this.place_endname = name;
-                markers.add(setMapMarker(name, address, end, number, Type));
+                markers.add(setMapMarker(1,name, address, end, number, Type));
             }
         }
     }
@@ -380,8 +391,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (!starttmp.equals("")) {
             startautoCompView.setHint("Start Location");
             startautoCompView.setHintTextColor(0x454545);
-        }else if (starttmp.equals("")) {
-            startLocationUpdates();
+        }if (starttmp.equals("")) {
             startautoCompView.setHint("Your Location...");
             startautoCompView.setHintTextColor(Color.BLACK);
             try {
@@ -407,14 +417,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             direction = new Direction(start, end, mMap);
             direction.execute();
         }
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(start, 18));
-//        mPolyLine = direction.parserTask.getPolyLine();
-        try {
-//            mPolyline.setColor(Color.BLACK);
-            direction.dcolor = Color.BLACK;
-        }catch (NullPointerException e){
-            toast(e.toString());
-        }
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(start, 16));
     }
 
     private void ShowPercent(){
@@ -588,7 +591,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onSaveInstanceState(savedInstanceState);
     }
 
-    private LatLng mLatLng(){
+    /**====================================================================*/
+
+    public LatLng mLatLng(){
         return new LatLng(mLocation.getLatitude(),mLocation.getLongitude());
     }
 

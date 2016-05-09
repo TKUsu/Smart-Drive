@@ -204,11 +204,17 @@
             android:src="@drawable/ic_play_dark"
             android:layout_alignParentBottom="true"
             android:layout_alignParentEnd="true"
-            android:layout_marginRight="30dp"
+            android:layout_marginRight="16dp"
             android:layout_marginLeft="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp" />
-
+        <android.support.design.widget.FloatingActionButton
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_alignTop="@+id/fab"
+            android:layout_toStartOf="@+id/fab"
+            android:src="@drawable/abc_btn_radio_to_on_mtrl_015"
+            android:id="@+id/fabLocation"/>
     </RelativeLayout>
 
 </RelativeLayout>

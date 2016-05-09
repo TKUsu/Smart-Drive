@@ -67,8 +67,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private ArrayList<Marker> markers = new ArrayList<>();
     private SQLiteHelper sqLiteHelper;
 
+    private Boolean startstop = false;
     private int ButtonNumber = 0;
-    private float DownX = 0;
+//    private float DownX = 0;
     private GoogleMap mMap;
     private UiSettings mUis;
     private LocationManager mLocationmgr;
@@ -139,9 +140,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View v) {
                 try {
-                    sqLiteHelper.checkout("insert", new LatLng(121,125));
+                    if (!startstop) {
+                        sqLiteHelper.checkout("insert", new LatLng(121, 125));
+                        Intent intent = new Intent(MapsActivity.this, SQLService.class);
+                        startService(intent);
+                        startstop = true;
+                    }
+                    if(startstop){
+                        Intent intent = new Intent(MapsActivity.this, SQLService.class);
+                        stopService(intent);
+                        startstop = false;
+                    }
                 }catch (NullPointerException e) {
-                    toast(e.toString());
+                    toast("Please Check Your Location is open");
+                }
+            }
+        });
+        FloatingActionButton fabLocation = (FloatingActionButton) findViewById(R.id.fabLocation);
+        fabLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    mMap.animateCamera(CameraUpdateFactory.newLatLng(mLatLng()));
+                }catch (NullPointerException e) {
+                    Log.e("Location Animator ",e.toString());
                 }
             }
         });
@@ -190,15 +212,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Log.i(TAG, "On Map Ready");
 
         mUis = mMap.getUiSettings();
-        mUis.setMyLocationButtonEnabled(true);
+        mUis.setMyLocationButtonEnabled(false);
         mUis.setZoomControlsEnabled(true);
         mUis.setCompassEnabled(true);
         mUis.setAllGesturesEnabled(true);
         mUis.setIndoorLevelPickerEnabled(true);
         mMap.setMyLocationEnabled(true);
         mMap.setTrafficEnabled(false);
-        mMap.setOnMarkerClickListener(this);
-        mMap.setPadding(0, 200, 0, getNavigationHeight(this));
+        mMap.setPadding(0, 0, 0, 2 * getNavigationHeight(this));
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED

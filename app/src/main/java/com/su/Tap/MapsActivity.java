@@ -70,7 +70,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LatLng start = null, end = null;
     private CharSequence place_startname = null, place_endname = null;
     private ArrayList<Marker> markers = new ArrayList<>();
-    private SQLiteHelper sqLiteHelper;
+    public SQLiteHelper sqLiteHelper;
 
     private Boolean startstop = false;
     private int ButtonNumber = 0;
@@ -138,24 +138,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
-        sqLiteHelper = new SQLiteHelper(this);
-        sqLiteHelper.setDB(sqLiteHelper.getWritableDatabase());
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    if (!startstop) {
-                        Intent intent = new Intent(MapsActivity.this, SQLService.class);
-                        startService(intent);
-                        startstop = true;
-                    }else if(startstop){
-                        Intent intent = new Intent(MapsActivity.this, SQLService.class);
-                        stopService(intent);
-                        startstop = false;
-                    }
-                }catch (NullPointerException e) {
-                    toast("Please Check Your Location is open");
+                if (!startstop) {
+//                    sqLiteHelper.sql("insert", new LatLng(121, 125));
+                    Intent intent = new Intent(MapsActivity.this, SQLService.class);
+                    startService(intent);
+                    startstop = true;
+                } else if (startstop) {
+                    Intent intent = new Intent(MapsActivity.this, SQLService.class);
+                    stopService(intent);
+                    startstop = false;
                 }
             }
         });
@@ -166,7 +161,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 try {
                     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mLatLng(),16));
                 }catch (NullPointerException e) {
-                    Log.e("Location Animator ",e.toString());
+                    Log.e("My Location",e.toString());
                 }
             }
         });
@@ -212,7 +207,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.mMap = googleMap;
-        Log.i(TAG, "On Map Ready");
+        Log.e(TAG, "On Map Ready");
 
         mUis = mMap.getUiSettings();
         mUis.setMyLocationButtonEnabled(false);
@@ -230,13 +225,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 return;
         }
         if (mLocation != null) {
-            Log.i(TAG, "Fist Location");
+            Log.e(TAG, "Fist Location");
             if (ButtonNumber == 0)
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mLatLng(), 18));
             else
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(mLatLng()));
         } else {
-            Log.i(TAG, "Get Last Known Location");
+            Log.e(TAG, "Get Last Known Location");
             Location location = mLocationmgr.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             if (location == null)
                 location = mLocationmgr.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);

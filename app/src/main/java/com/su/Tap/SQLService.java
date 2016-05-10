@@ -13,6 +13,7 @@ import com.google.android.gms.maps.model.LatLng;
  */
 public class SQLService extends Service {
 
+    private final String TAG = "SQL";
     private MapsActivity mapsActivity;
     private LatLng myLocation;
     private SQLiteHelper sqLiteHelper;
@@ -32,14 +33,21 @@ public class SQLService extends Service {
 
     @Override
     public void onStart(Intent intent, int startId) {
+        sqLiteHelper = new SQLiteHelper(this);
+        sqLiteHelper.setDB(sqLiteHelper.getWritableDatabase());
         Toast.makeText(this, "Service start", Toast.LENGTH_SHORT).show();
         try {
-//            sqLiteHelper.sql("insert", new LatLng(121, 125));
+            this.myLocation = mapsActivity.mLatLng();
+            Log.e(TAG, "My Location:" + myLocation.toString());
         }catch (NullPointerException e){
-            Log.e("Test Service","NullPointerException");
+            Log.e(TAG,"Service's Location is NullPointerException");
         }
-//        mapsActivity = new MapsActivity();
-//        this.myLocation = mapsActivity.mLatLng();
+        try{
+//            sqLiteHelper.sql("insert", new LatLng(121, 125));
+            sqLiteHelper.sql("insert", new LatLng(121, 125));
+        }catch (NullPointerException e){
+            Log.e(TAG,"sqLiteHelper is null point");
+        }
     }
     public void onDestroy(){
         super.onDestroy();

@@ -16,11 +16,10 @@ import com.google.android.gms.maps.model.LatLng;
  */
 public class SQLiteHelper extends SQLiteOpenHelper {
 
-    private MapsActivity main;
-
     private static final String DATABASE_NAME = "roadDB";
     private static final int DATABASE_VERSION = 1;
     private SQLiteDatabase db;
+    private String TAG = "SQL";
 
     public SQLiteHelper(Context context) {
         //透過建構子MyDBHelper直接呼叫父類別建構子來建立參數的資料庫
@@ -55,7 +54,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                 cv.put("lat", latLng.latitude);
                 cv.put("lng", latLng.longitude);
                 idtemp = db.insert("roadDBs", null, cv);
-                Log.e("DB","新增記錄成功" + idtemp);
+                Log.e(TAG,"新增記錄成功" + idtemp);
                 break;
             case "search":
                 SqlQuery("SELECT * FROM " + "roadDBs");
@@ -93,6 +92,10 @@ public class SQLiteHelper extends SQLiteOpenHelper {
             str += c.getString(2) + "\n";
             c.moveToNext();
         }
-        Log.e("Search Road BD : ",str.toString());
+        Log.e(TAG + "Search Road BD : ",str.toString());
+    }
+
+    public void call(){
+        Log.e(TAG,"call back");
     }
 }

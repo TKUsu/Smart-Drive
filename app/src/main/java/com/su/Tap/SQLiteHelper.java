@@ -54,7 +54,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                 cv.put("lat", latLng.latitude);
                 cv.put("lng", latLng.longitude);
                 idtemp = db.insert("roadDBs", null, cv);
-                Log.e(TAG,"新增記錄成功" + idtemp);
+                Log.e(TAG,"新增記錄成功" + idtemp + ":" + latLng.toString());
                 break;
             case "search":
                 SqlQuery("SELECT * FROM " + "roadDBs");
@@ -93,9 +93,5 @@ public class SQLiteHelper extends SQLiteOpenHelper {
             c.moveToNext();
         }
         Log.e(TAG + "Search Road BD : ",str.toString());
-    }
-
-    public void call(){
-        Log.e(TAG,"call back");
     }
 }

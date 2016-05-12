@@ -1,6 +1,8 @@
 package com.su.Tap;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.util.Log;
@@ -14,9 +16,8 @@ import com.google.android.gms.maps.model.LatLng;
 public class SQLService extends Service {
 
     private final String TAG = "SQL";
-    private MapsActivity mapsActivity;
-    private LatLng myLocation;
     private SQLiteHelper sqLiteHelper;
+    private BroadcastReceiver broadcastReceiverd;
 
     @Override
     public IBinder onBind(Intent arg0) {
@@ -30,6 +31,7 @@ public class SQLService extends Service {
         super.onCreate();
     }
 
+    private Double MyLat,MyLng;
 
     @Override
     public void onStart(Intent intent, int startId) {
@@ -37,16 +39,21 @@ public class SQLService extends Service {
         sqLiteHelper.setDB(sqLiteHelper.getWritableDatabase());
         Toast.makeText(this, "Service start", Toast.LENGTH_SHORT).show();
         try {
-            this.myLocation = mapsActivity.mLatLng();
-            Log.e(TAG, "My Location:" + myLocation.toString());
+//            this.myLocation = mapsActivity.mLatLng();
+            broadcastReceiverd = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (intent.equals("com.my.location")){
+                        intent.getDoubleExtra("MyLat", MyLat);
+                        intent.getDoubleExtra("MyLng",MyLng);
+                    }
+                }
+            };
+            Log.e(TAG, "My Location:" + MyLat+"."+MyLng);
+
+            sqLiteHelper.sql("insert", new LatLng(MyLat, MyLng));
         }catch (NullPointerException e){
             Log.e(TAG,"Service's Location is NullPointerException");
-        }
-        try{
-//            sqLiteHelper.sql("insert", new LatLng(121, 125));
-            sqLiteHelper.sql("insert", new LatLng(121, 125));
-        }catch (NullPointerException e){
-            Log.e(TAG,"sqLiteHelper is null point");
         }
     }
     public void onDestroy(){

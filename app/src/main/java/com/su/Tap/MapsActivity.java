@@ -1,5 +1,6 @@
 package com.su.Tap;
 
+import android.app.PendingIntent;
 import android.app.Service;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -78,6 +79,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private UiSettings mUis;
     private LocationManager mLocationmgr;
+
     private Location mLocation = null;
     /**
      * Tracks the status of the location updates request. Value changes when the user presses the
@@ -90,8 +92,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected String mLastUpdateTime;
     protected GoogleApiClient mGoogleApiClient;
     protected LocationRequest mLocationRequest;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,9 +143,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View v) {
                 if (!startstop) {
+                    Intent intent = new Intent("com.my.location");
+                    intent.putExtra("MyLat",25);
+                    intent.putExtra("MyLng",121);
+                    sendBroadcast(intent);
 //                    sqLiteHelper.sql("insert", new LatLng(121, 125));
-                    Intent intent = new Intent(MapsActivity.this, SQLService.class);
-                    startService(intent);
+                    Intent intent2 = new Intent(MapsActivity.this, SQLService.class);
+                    startService(intent2);
                     startstop = true;
                 } else if (startstop) {
                     Intent intent = new Intent(MapsActivity.this, SQLService.class);

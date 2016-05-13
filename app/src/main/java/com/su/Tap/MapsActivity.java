@@ -141,7 +141,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onClick(View v) {
                 if (!startstop) {
                     Intent intent = new Intent();
-                    intent.setAction("mylocation");
+                    intent.setAction("com.Tap.My.Location");
                     intent.putExtra("Lat", 25.0);
                     intent.putExtra("Lng", 121.0);
                     sendBroadcast(intent);

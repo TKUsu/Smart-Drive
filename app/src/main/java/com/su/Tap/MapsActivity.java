@@ -174,9 +174,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onResume();
         if (mGoogleApiClient.isConnected() && mRequestingLocationUpdates)
             startLocationUpdates();
-        IntentFilter filter = new IntentFilter();
-        filter.addAction("com.wuyinlei.action.BROADCAST");
-        registerReceiver(mTwoReceiver, filter);
     }
 
     @Override
@@ -185,7 +182,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Stop location updates to save battery, but don't disconnect the GoogleApiClient object.
         if (mGoogleApiClient.isConnected())
             stopLocationUpdates();
-        unregisterReceiver(mTwoReceiver);
     }
 
     @Override
@@ -204,6 +200,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onStop() {
         super.onStop();
         mGoogleApiClient.disconnect();
+
     }
 
     /**

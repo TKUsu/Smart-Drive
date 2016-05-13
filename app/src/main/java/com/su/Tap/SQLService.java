@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -31,10 +32,14 @@ public class SQLService extends Service {
     public void onCreate() {
         // TODO Auto-generated method stub
         super.onCreate();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("mylocation");
+        registerReceiver(broadcastReceiverd, filter);
     }
 
 //    private Double MyLat,MyLng;
     private MyBroadcastReceiver myBroadcastReceiver;
+    private Double Lat,Lng;
 
     @Override
     public void onStart(Intent intent, int startId) {
@@ -42,29 +47,37 @@ public class SQLService extends Service {
 //        sqLiteHelper.setDB(sqLiteHelper.getWritableDatabase());
         Toast.makeText(this, "Service start", Toast.LENGTH_SHORT).show();
         try {
+            broadcastReceiverd = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    String strAction = intent.getAction();
+                    Log.e("SQL", "action:" + strAction);
+                    Bundle bundle = intent.getExtras();
+                    try{
+                        Lat = bundle.getDouble("Lat");
+                        Lng = bundle.getDouble("Lng");
+                        Log.e("SQL",Lat.toString()+Lng.toString());
+                    }catch (NullPointerException e){
+                        Log.e("SQL","MyBroadcastReceiver is NullPointerException");
+                    }
+                }
+            };
 //            this.myLocation = mapsActivity.mLatLng();
-            myBroadcastReceiver = new MyBroadcastReceiver();
+//            myBroadcastReceiver = new MyBroadcastReceiver();
 //        myBroadcastReceiver.SQLstart();
-            MyLatLng = myBroadcastReceiver.getLatLng();
+//            MyLatLng = myBroadcastReceiver.getLatLng();
 //            sqLiteHelper.sql("insert",MyLatLng);
-            Log.e(TAG,MyLatLng.toString());
+            Log.e(TAG,new LatLng(Lat,Lng).toString());
         }catch (NullPointerException e){
             Log.e(TAG,"Service's Location is NullPointerException");
         }
     }
     public void onDestroy(){
         super.onDestroy();
+//        unregisterReceiver(broadcastReceiverd);
         Toast.makeText(this, "Service stop", Toast.LENGTH_SHORT).show();
     }
 
-    public void A(){
-        broadcastReceiverd = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-
-            }
-        };
-    }
 
     public static class MyBroadcastReceiver extends BroadcastReceiver{
         private Double Lat,Lng;

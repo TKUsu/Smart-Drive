@@ -1,9 +1,6 @@
 package com.su.Tap;
 
-import android.app.PendingIntent;
-import android.app.Service;
-import android.os.IBinder;
-import android.support.annotation.Nullable;
+import android.content.IntentFilter;
 import android.support.design.widget.FloatingActionButton;
 
 import android.Manifest;
@@ -60,7 +57,7 @@ import java.util.Locale;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
-        GoogleMap.OnMarkerClickListener{
+        GoogleMap.OnMarkerClickListener {
 
     private Direction direction;
 
@@ -75,7 +72,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private Boolean startstop = false;
     private int ButtonNumber = 0;
-//    private float DownX = 0;
+    //    private float DownX = 0;
     private GoogleMap mMap;
     private UiSettings mUis;
     private LocationManager mLocationmgr;
@@ -122,7 +119,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 String s = (String) parent.getItemAtPosition(position);
                 start = getLatLongFromAddress(s);
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(start));
-                markers.add(setMapMarker(0,s, null, start, null, null));
+                markers.add(setMapMarker(0, s, null, start, null, null));
             }
         });
 
@@ -134,7 +131,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 String s = (String) parent.getItemAtPosition(position);
                 end = getLatLongFromAddress(s);
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(end));
-                markers.add(setMapMarker(1,s, null, end, null, null));
+                markers.add(setMapMarker(1, s, null, end, null, null));
             }
         });
 
@@ -143,9 +140,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View v) {
                 if (!startstop) {
-                    Intent intent = new Intent("com.my.location");
-                    intent.putExtra("MyLat",25);
-                    intent.putExtra("MyLng",121);
+                    Intent intent = new Intent();
+                    intent.setAction("mylocation");
+                    intent.putExtra("Lat", 25.0);
+                    intent.putExtra("Lng", 121.0);
                     sendBroadcast(intent);
 //                    sqLiteHelper.sql("insert", new LatLng(121, 125));
                     Intent intent2 = new Intent(MapsActivity.this, SQLService.class);
@@ -163,9 +161,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View v) {
                 try {
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mLatLng(),16));
-                }catch (NullPointerException e) {
-                    Log.e("My Location",e.toString());
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mLatLng(), 16));
+                } catch (NullPointerException e) {
+                    Log.e("My Location", e.toString());
                 }
             }
         });
@@ -176,6 +174,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onResume();
         if (mGoogleApiClient.isConnected() && mRequestingLocationUpdates)
             startLocationUpdates();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("com.wuyinlei.action.BROADCAST");
+        registerReceiver(mTwoReceiver, filter);
     }
 
     @Override
@@ -184,6 +185,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Stop location updates to save battery, but don't disconnect the GoogleApiClient object.
         if (mGoogleApiClient.isConnected())
             stopLocationUpdates();
+        unregisterReceiver(mTwoReceiver);
     }
 
     @Override
@@ -223,11 +225,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setTrafficEnabled(false);
         mMap.setPadding(0, 0, 0, 2 * getNavigationHeight(this));
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                    && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-                return;
-        }
         if (mLocation != null) {
             Log.e(TAG, "Fist Location");
             if (ButtonNumber == 0)
@@ -235,7 +232,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             else
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(mLatLng()));
         } else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    // TODO: Consider calling
+                    //    public void requestPermissions(@NonNull String[] permissions, int requestCode)
+                    // here to request the missing permissions, and then overriding
+                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                    //                                          int[] grantResults)
+                    // to handle the case where the user grants the permission. See the documentation
+                    // for Activity#requestPermissions for more details.
+                    return;
+                }
+            }
             Log.e(TAG, "Get Last Known Location");
+
             Location location = mLocationmgr.getLastKnownLocation(LocationManager.GPS_PROVIDER);
             if (location == null)
                 location = mLocationmgr.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
@@ -638,5 +648,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }catch (NullPointerException e){
             Log.e("MapActivity toast",e.toString());
         }
+    }
+
+    public boolean checkLocationPermission(){
+        String permission = "android.permission.ACCESS_FINE_LOCATION";
+        int res = this.checkCallingOrSelfPermission(permission);
+        return (res == PackageManager.PERMISSION_GRANTED);
     }
 }

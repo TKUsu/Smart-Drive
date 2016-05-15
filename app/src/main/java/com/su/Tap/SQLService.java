@@ -19,8 +19,7 @@ public class SQLService extends Service {
 
     private final String TAG = "SQL";
     private SQLiteHelper sqLiteHelper;
-//    private BroadcastReceiver broadcastReceiverd;
-//    private LatLng MyLatLng;
+    private LatLng MyLatLng;
 
     @Override
     public IBinder onBind(Intent arg0) {
@@ -32,14 +31,12 @@ public class SQLService extends Service {
     public void onCreate() {
         // TODO Auto-generated method stub
         super.onCreate();
-//        IntentFilter filter = new IntentFilter();
-//        filter.addAction("mylocation");
-//        registerReceiver(broadcastReceiverd, filter);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("action");
+        filter.addAction("anotherAction");
+        myBroadcastReceiver = new MyBroadcastReceiver();
+        registerReceiver(myBroadcastReceiver, filter);
     }
-
-//    private Double MyLat,MyLng;
-//    private MyBroadcastReceiver myBroadcastReceiver;
-    private Double Lat = 12.0,Lng = 23.0;
 
     @Override
     public void onStart(Intent intent, int startId) {
@@ -47,29 +44,8 @@ public class SQLService extends Service {
         sqLiteHelper.setDB(sqLiteHelper.getWritableDatabase());
         Toast.makeText(this, "Service start", Toast.LENGTH_SHORT).show();
         try {
-//            broadcastReceiverd = new BroadcastReceiver() {
-//                @Override
-//                public void onReceive(Context context, Intent intent) {
-//                    String strAction = intent.getAction();
-//                    Log.e("SQL", "action:" + strAction);
-//                    Bundle bundle = intent.getExtras();
-//                    try{
-//                        Lat = bundle.getDouble("Lat");
-//                        Lng = bundle.getDouble("Lng");
-//                        Log.e("SQL",Lat.toString()+Lng.toString());
-//                    }catch (NullPointerException e){
-//                        Log.e("SQL","MyBroadcastReceiver is NullPointerException");
-//                    }
-//                }
-//            };
-
-
-//            this.myLocation = mapsActivity.mLatLng();
-//            myBroadcastReceiver = new MyBroadcastReceiver();
-//        myBroadcastReceiver.SQLstart();
-//            MyLatLng = myBroadcastReceiver.getLatLng();
-            sqLiteHelper.sql("insert",new LatLng(Lat,Lng));
-            Log.e(TAG,new LatLng(Lat,Lng).toString());
+//            sqLiteHelper.sql("insert",new LatLng(Lat,Lng));
+            Log.e(TAG,MyLatLng.toString());
         }catch (NullPointerException e){
             Log.e(TAG,"Service's Location is NullPointerException");
         }
@@ -78,29 +54,6 @@ public class SQLService extends Service {
         super.onDestroy();
 //        unregisterReceiver(broadcastReceiverd);
         Toast.makeText(this, "Service stop", Toast.LENGTH_SHORT).show();
-    }
-
-
-    public class MyBroadcastReceiver extends BroadcastReceiver{
-        private Double Lat,Lng;
-
-        public MyBroadcastReceiver(){
-
-        }
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String strAction = intent.getAction();
-            Log.e("SQL", "action:" + strAction);
-            Bundle bundle = intent.getExtras();
-            try{
-                Lat = bundle.getDouble("Lat");
-                Lng = bundle.getDouble("Lng");
-                Log.e("SQL",Lat.toString()+Lng.toString());
-            }catch (NullPointerException e){
-                Log.e("SQL","MyBroadcastReceiver is NullPointerException");
-            }
-        }
     }
 }
 

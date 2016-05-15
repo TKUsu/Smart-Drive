@@ -1,5 +1,6 @@
 package com.su.Tap;
 
+import android.content.BroadcastReceiver;
 import android.content.IntentFilter;
 import android.support.design.widget.FloatingActionButton;
 
@@ -49,6 +50,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -57,7 +59,7 @@ import java.util.Locale;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
-        GoogleMap.OnMarkerClickListener {
+        GoogleMap.OnMarkerClickListener, Serializable {
 
     private Direction direction;
 
@@ -71,7 +73,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public SQLiteHelper sqLiteHelper;
 
     private Boolean startstop = false;
-    private int ButtonNumber = 0;
+    public int ButtonNumber = 0;
     //    private float DownX = 0;
     private GoogleMap mMap;
     private UiSettings mUis;
@@ -135,23 +137,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
+        final Intent[] intent = new Intent[2];
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!startstop) {
-                    Intent intent = new Intent();
-                    intent.setAction("com.Tap.My.Location");
-                    intent.putExtra("Lat", 25.0);
-                    intent.putExtra("Lng", 121.0);
-                    sendBroadcast(intent);
-//                    sqLiteHelper.sql("insert", new LatLng(121, 125));
-                    Intent intent2 = new Intent(MapsActivity.this, SQLService.class);
-                    startService(intent2);
+                    intent[0] = new Intent();
+                    intent[0].setAction("com.Tap.My.Location");
+                    intent[0].putExtra("Lat", 25.0);
+                    intent[0].putExtra("Lng", 121.0);
+                    sendBroadcast(intent[0]);
+
+                    intent[1] = new Intent(MapsActivity.this, SQLService.class);
+                    startService(intent[1]);
                     startstop = true;
                 } else if (startstop) {
-                    Intent intent = new Intent(MapsActivity.this, SQLService.class);
-                    stopService(intent);
+                    intent[0] = new Intent(MapsActivity.this, SQLService.class);
+                    stopService(intent[0]);
                     startstop = false;
                 }
             }
@@ -201,6 +204,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onStop();
         mGoogleApiClient.disconnect();
 
+    }
+
+    private BroadcastReceiver myBroadcastReceiver;
+    public class MyBroadcastReceiver extends BroadcastReceiver{
+        Double Lat,Lng;
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String strAction = intent.getAction();
+            Log.e("SQL", "action:" + strAction);
+            Bundle bundle = intent.getExtras();
+            try{
+                Lat = bundle.getDouble("Lat");
+                Lng = bundle.getDouble("Lng");
+                Log.e("SQL",Lat.toString()+Lng.toString());
+            }catch (NullPointerException e){
+                Log.e("SQL","MyBroadcastReceiver is NullPointerException");
+            }
+        }
+        public LatLng getLatLng(){
+            return new LatLng(Lat,Lng);
+        }
+        public MyBroadcastReceiver(){}
     }
 
     /**

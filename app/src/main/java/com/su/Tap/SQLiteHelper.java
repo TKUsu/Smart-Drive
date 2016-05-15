@@ -91,8 +91,8 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         while(c.moveToNext()){
             double Lat = c.getDouble(c.getColumnIndex("lat"));
             double Lng = c.getDouble(c.getColumnIndex("lng"));
-//            int i = c.getInt(c.getColumnIndex("_id"));
-            map.put(1,new LatLng(Lat,Lng));
+            int i = c.getInt(c.getColumnIndex("_id"));
+            map.put(i,new LatLng(Lat,Lng));
         }return map;
     }
 }

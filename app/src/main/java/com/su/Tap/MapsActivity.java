@@ -1,7 +1,5 @@
 package com.su.Tap;
 
-import android.content.BroadcastReceiver;
-import android.content.IntentFilter;
 import android.support.design.widget.FloatingActionButton;
 
 import android.Manifest;
@@ -72,7 +70,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private ArrayList<Marker> markers = new ArrayList<>();
     public SQLiteHelper sqLiteHelper;
 
-    private Boolean startstop = false;
+    private Boolean startstop = true;
+    private Boolean isRunning = false;
     public int ButtonNumber = 0;
     //    private float DownX = 0;
     private GoogleMap mMap;
@@ -137,27 +136,45 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
+        final Thread[] thread = new Thread[1];
         final Intent[] intent = new Intent[2];
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!startstop) {
-                    intent[0] = new Intent();
-                    intent[0].setAction("com.Tap.My.Location");
-                    intent[0].putExtra("Lat", 25.0);
-                    intent[0].putExtra("Lng", 121.0);
-                    sendBroadcast(intent[0]);
-
-                    intent[1] = new Intent(MapsActivity.this, SQLService.class);
-                    startService(intent[1]);
-                    startstop = true;
-                } else if (startstop) {
-                    intent[0] = new Intent(MapsActivity.this, SQLService.class);
-                    stopService(intent[0]);
-                    startstop = false;
-                }
+//                if (mLocation != null){
+                    if (!startstop) {
+                        thread[0] = new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                while (isRunning) {
+                                    intent[1] = new Intent(MapsActivity.this, SQLService.class);
+                                   intent[1].putExtra("Lat", 25.0);
+                                   intent[1].putExtra("Lng", 121.0);
+//                                    intent[1].putExtra("Lat", mLocation.getLatitude());
+//                                    intent[1].putExtra("Lng", mLocation.getLatitude());
+                                    startService(intent[1]);
+                                    try {
+                                        Thread.sleep(1000);
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                        });
+                        thread[0].start();
+                        isRunning = true;
+                        startstop = true;
+                    } else {
+                        isRunning = false;
+                        intent[0] = new Intent(MapsActivity.this, SQLService.class);
+                        stopService(intent[0]);
+                        startstop = false;
+                    }
+//                }else
+//                    toast("Please check your GPS is opened");
             }
+
         });
         FloatingActionButton fabLocation = (FloatingActionButton) findViewById(R.id.fabLocation);
         fabLocation.setOnClickListener(new View.OnClickListener() {
@@ -166,10 +183,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 try {
                     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mLatLng(), 16));
                 } catch (NullPointerException e) {
+                    toast("Please check your GPS is opened");
                     Log.e("My Location", e.toString());
                 }
             }
         });
+
+        //使用該LOG可以知道當下是使用哪個執行緒,1為主執行緒
+        Log.e("thread","Map id="+String.valueOf(Thread.currentThread().getId()));
     }
 
     @Override
@@ -204,28 +225,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onStop();
         mGoogleApiClient.disconnect();
 
-    }
-
-    private BroadcastReceiver myBroadcastReceiver;
-    public class MyBroadcastReceiver extends BroadcastReceiver{
-        Double Lat,Lng;
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String strAction = intent.getAction();
-            Log.e("SQL", "action:" + strAction);
-            Bundle bundle = intent.getExtras();
-            try{
-                Lat = bundle.getDouble("Lat");
-                Lng = bundle.getDouble("Lng");
-                Log.e("SQL",Lat.toString()+Lng.toString());
-            }catch (NullPointerException e){
-                Log.e("SQL","MyBroadcastReceiver is NullPointerException");
-            }
-        }
-        public LatLng getLatLng(){
-            return new LatLng(Lat,Lng);
-        }
-        public MyBroadcastReceiver(){}
     }
 
     /**
@@ -329,8 +328,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 "SRange = "+String.valueOf(SRange)+"DRange = "+String.valueOf(DRange));
         myAnimation(0, 200, -200, 200, -10, -90);
         mButtonDown.setTranslationX(-100);
-//        direction.deletePolyLine();
-        direction.parserTask.deletePolyLine();
+//        direction.parserTask.deletePolyLine();
+        mMap.clear();
     }
     private void SearchBarRideUp() {
         /**

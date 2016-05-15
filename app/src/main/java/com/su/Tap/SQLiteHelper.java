@@ -11,6 +11,10 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 /**
  * Created by Nicole on 2016/4/28.
  */
@@ -29,7 +33,8 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE roadDBs (" +
-                "_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                " _ID INTEGER  PRIMARY KEY," +
+                "number INTEGER,"+
                 " lat DOUBLE," +
                 " lng DOUBLE)");
     }
@@ -44,20 +49,23 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         this.db = db;
     }
 
-    public void sql(String temp, LatLng latLng) {
+//    public HashMap sql(String temp, LatLng latLng,int DB_ID) {
+    public HashMap sql(String temp, LatLng latLng) {
         ContentValues cv;
+        HashMap map = null;
 //        int count, id;
         switch (temp) {
             case "insert":
                 long idtemp;
                 cv = new ContentValues();
+//                cv.put("number", DB_ID);
                 cv.put("lat", latLng.latitude);
                 cv.put("lng", latLng.longitude);
                 idtemp = db.insert("roadDBs", null, cv);
-                Log.e(TAG,"新增記錄成功" + idtemp + ":" + latLng.toString());
+                Log.e(TAG,"新增記錄成功" + /*" DB_ID:" + DB_ID +*/ idtemp + ":" + latLng.toString());
                 break;
             case "search":
-                SqlQuery("SELECT * FROM " + "roadDBs");
+                map = SqlQuery("SELECT * FROM " + "roadDBs");
                 break;
 //                case "update":
 //                    id = Integer.parseInt(tid.getText().toString());
@@ -73,25 +81,18 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 //                            "", "_id=" + id, null);
 //                    output.setText("刪除記錄成功" + count);
 //                    break;
-        }
+        }return map;
     }
 
-    public void SqlQuery(String sql) {
-        String[] colNames;
-        String str = "";
+    public HashMap SqlQuery(String sql) {
+        HashMap map = new HashMap();
         Cursor c = db.rawQuery(sql, null);
-        colNames = c.getColumnNames();
-        for (int i = 0; i < colNames.length; i++) {
-            str += colNames[i] + "\t\t";
-        }
-        str += "\n";
         c.moveToFirst();
-        for (int i = 0; i < c.getCount(); i++) {
-            str += c.getString(0) + "\t";
-            str += c.getString(1) + "\t";
-            str += c.getString(2) + "\n";
-            c.moveToNext();
-        }
-        Log.e(TAG + "Search Road BD : ",str.toString());
+        while(c.moveToNext()){
+            double Lat = c.getDouble(c.getColumnIndex("lat"));
+            double Lng = c.getDouble(c.getColumnIndex("lng"));
+//            int i = c.getInt(c.getColumnIndex("_id"));
+            map.put(1,new LatLng(Lat,Lng));
+        }return map;
     }
 }

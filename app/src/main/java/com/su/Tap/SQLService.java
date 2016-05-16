@@ -9,6 +9,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -16,10 +17,10 @@ import java.util.HashMap;
  */
 public class SQLService extends Service {
 
-    public static int DB_ID;
+    private int id = 0;
     public static LatLng MyLatLng;
     private final String TAG = "SQL";
-    private SQLiteHelper sqLiteHelper;
+    private static SQLiteHelper sqLiteHelper;
 
     @Override
     public IBinder onBind(Intent arg0) {
@@ -40,8 +41,9 @@ public class SQLService extends Service {
 
     @Override
     public int onStartCommand(final Intent intent, int flags, int startId) {
+        Toast.makeText(this, "Service start", Toast.LENGTH_SHORT).show();
         sqLiteHelper = new SQLiteHelper(this);
-        sqLiteHelper.setDB(sqLiteHelper.getWritableDatabase());
+        sqLiteHelper.setData(sqLiteHelper.getWritableDatabase());
         Thread mServiceThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -52,9 +54,8 @@ public class SQLService extends Service {
                     Lng = bundle.getDouble("Lng");
                     MyLatLng = new LatLng(Lat, Lng);
                     Log.e(TAG, "Service: " + MyLatLng.toString());
-//                    sqLiteHelper.sql("insert", new LatLng(Lat, Lng),DB_ID);
-                    sqLiteHelper.sql("insert", new LatLng(Lat, Lng));
-//                    Log.e("SQL","--------------------------------------------"+DB_ID);
+                    id = sqLiteHelper.getID();
+                    sqLiteHelper.sql("insert", new LatLng(Lat, Lng),id);
                 }catch (NullPointerException e){
                     Log.e(TAG, "Service's Location isn't point");
                 }
@@ -72,20 +73,7 @@ public class SQLService extends Service {
     @Override
     public void onDestroy(){
         super.onDestroy();
-        DB_ID = DB_ID+1;
-        showDB();
-        drqwDBPolyline();
         Toast.makeText(this, "Service stop", Toast.LENGTH_SHORT).show();
-    }
-    private void showDB(){
-//        HashMap map = sqLiteHelper.sql("search",null,0);
-        HashMap map = sqLiteHelper.sql("search",null);
-        for (Object key : map.keySet()) {
-            Log.d("SQL",key + " : " + map.get(key));
-        }
-    }
-    private void drqwDBPolyline(){
-
     }
 }
 

@@ -29,7 +29,6 @@ public class Direction extends AsyncTask<Void, Void, String> {
     public static int dcolor = Color.BLUE;
     public static int lineWidth = 10;
 
-    private ArrayList lineList = new ArrayList<LatLng>();
     private PolylineOptions lineOptions;
 
     public Direction(LatLng start, LatLng end, GoogleMap mMap) {
@@ -96,18 +95,16 @@ public class Direction extends AsyncTask<Void, Void, String> {
                     List<HashMap<String, String>> path = result.get(i);  // Fetching all the points in i-th route
                     for (j = 0; j < path.size(); j++) {
                         HashMap<String, String> point = path.get(j);
-
                         double lat = Double.parseDouble(point.get("lat"));
                         double lng = Double.parseDouble(point.get("lng"));
                         LatLng position = new LatLng(lat, lng);
                         points.add(position);
                     }
-
+                    Log.d("SQL","Direction list:"+points.toString());
                     // Adding all the points in the route to LineOptions
                     lineOptions.addAll(points);
                     lineOptions.width(lineWidth);  //導航路徑寬度
                     lineOptions.color(dcolor); //導航路徑顏色
-                    lineList = points;
                 }
                 // Drawing polyline in the Google Map for the i-th route
                 dPolyline = dMap.addPolyline(lineOptions);

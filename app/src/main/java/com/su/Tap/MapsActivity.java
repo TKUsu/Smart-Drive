@@ -49,6 +49,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.io.Serializable;
 import java.text.DateFormat;
@@ -69,17 +71,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private AutoCompleteTextView startautoCompView = null, endautiComView = null;
     private LinearLayout mSearchBar;
     private Button mButtonDown;
+    private FloatingActionButton fabLocation,fabService,fabTest;
 
     private LatLng start = null, end = null;
     private CharSequence place_startname = null, place_endname = null;
     private ArrayList<Marker> markers = new ArrayList<>();
+    private ArrayList<LatLng> myLocaitonList = new ArrayList<>();
     public SQLiteHelper sqLiteHelper;
 
+    private Boolean myLocationDrawJudgement = false;
     private Boolean startstop = true;
     private Boolean isRunning = false;
     public int ButtonNumber = 0;
     //    private float DownX = 0;
-    private GoogleMap mMap;
+    public GoogleMap mMap;
     private UiSettings mUis;
     private LocationManager mLocationmgr;
 
@@ -107,6 +112,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private final String TAG_Activity = "Activity is :";
 
+    @TargetApi(Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -122,6 +128,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             requestPermissions(INITIAL_PERMS, INITIAL_REQUEST);
 
         Theme();
+
+        fabControl();
 
         mButtonDown = (Button) findViewById(R.id.down);
         mSearchBar = (LinearLayout) findViewById(R.id.searchBar);
@@ -154,55 +162,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 end = getLatLongFromAddress(s);
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(end));
                 markers.add(setMapMarker(1, s, null, end, null, null));
-            }
-        });
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mLocation != null){
-                if (!startstop) {
-                    thread = new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            while (isRunning) {
-                                intentService = new Intent(MapsActivity.this, SQLService.class);
-                                intentService.putExtra("Lat", mLocation.getLatitude());
-                                intentService.putExtra("Lng", mLocation.getLatitude());
-                                startService(intentService);
-                                try {
-                                    Thread.sleep(1000);
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }
-                    });
-                    thread.start();
-                    isRunning = true;
-                    startstop = true;
-                } else {
-                    isRunning = false;
-                    intentService = new Intent(MapsActivity.this, SQLService.class);
-                    stopService(intentService);
-                    startstop = false;
-                }
-                }else
-                    toast("Please check your GPS is opened");
-            }
-
-        });
-        FloatingActionButton fabLocation = (FloatingActionButton) findViewById(R.id.fabLocation);
-        fabLocation.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                try {
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mLatLng(), 16));
-                } catch (NullPointerException e) {
-                    toast("Please check your GPS is opened");
-                    Log.e("My Location", e.toString());
-                }
             }
         });
 
@@ -260,6 +219,92 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Log.i(TAG_Activity,"onDestroy");
     }
 
+    private void fabControl(){
+        fabService = (FloatingActionButton) findViewById(R.id.fab);
+        fabService.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mLocation != null) {
+                    if (!startstop) {
+                        fabService.setImageResource(R.drawable.ic_pause_dark);
+                        isRunning = true;
+                        startstop = true;
+                        thread = new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                while (isRunning) {
+                                    intentService = new Intent(MapsActivity.this, SQLService.class);
+                                    intentService.putExtra("Lat", mLocation.getLatitude());
+                                    intentService.putExtra("Lng", mLocation.getLatitude());
+                                    startService(intentService);
+                                    try {
+                                        Thread.sleep(1000);
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                        });
+                        thread.start();
+                    } else {
+                        fabService.setImageResource(R.drawable.ic_play_dark);
+                        isRunning = false;
+                        startstop = false;
+                        intentService = new Intent(MapsActivity.this, SQLService.class);
+                        stopService(intentService);
+                    }
+                }else
+                    toast("Please check your GPS is opened");
+            }
+
+        });
+        fabLocation = (FloatingActionButton) findViewById(R.id.fabLocation);
+        fabLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mLatLng(), 18));
+                } catch (NullPointerException e) {
+                    toast("Please check your GPS is opened");
+                    Log.e("My Location", e.toString());
+                }
+            }
+        });
+        fabTest = (FloatingActionButton)findViewById(R.id.fabTest);
+        fabTest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PolylineOptions lineOptions = new PolylineOptions();
+                Polyline polyline = null;
+                int dcolor = R.color.currentMyRoad;
+                int lineWidth = 10;
+                sqLiteHelper = new SQLiteHelper(MapsActivity.this);
+                sqLiteHelper.setData(sqLiteHelper.getWritableDatabase());
+                sqLiteHelper.sql("search",null,0);
+                myLocaitonList = sqLiteHelper.getlsit();
+                try{
+                    Log.d("SQL","MapActivity list:"+myLocaitonList.toString());
+                }catch (NullPointerException e){
+                    Log.d("SQL","MapActivity list is NULL");
+                }
+                if (!myLocationDrawJudgement){
+                    Log.d("SQL","Drawing now~~~");
+                    // Adding all the points in the route to LineOptions
+                    lineOptions.addAll(myLocaitonList);
+                    lineOptions.width(lineWidth);  //導航路徑寬度
+                    lineOptions.color(dcolor); //導航路徑顏色
+                    polyline = mMap.addPolyline(lineOptions);
+                    myLocationDrawJudgement = true;
+                }else {
+                    Log.d("SQL","Polyline clean~~~");
+                    if (polyline != null)
+                        polyline.remove();
+                    myLocationDrawJudgement = false;
+                }
+            }
+        });
+    }
+
     /**
      *              Map
      * @param googleMap
@@ -297,7 +342,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 location = mLocationmgr.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
             if (location != null) {
                 if (ButtonNumber == 0)
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 16));
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 18));
                 else
                     mMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
             } else
@@ -333,7 +378,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .snippet(markertxt)
                 .flat(true)
                 .icon(markerColor));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
         return marker;
     }
 
@@ -477,7 +522,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             direction = new Direction(start, end, mMap);
             direction.execute();
         }
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(start, 16));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(start, 18));
     }
 
     private void ShowPercent() {
@@ -730,6 +775,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private boolean canAccessLocation() {
         return(hasPermission(Manifest.permission.ACCESS_FINE_LOCATION));
     }
+    @TargetApi(Build.VERSION_CODES.M)
     private boolean hasPermission(String perm) {
         return(PackageManager.PERMISSION_GRANTED==checkSelfPermission(perm));
     }

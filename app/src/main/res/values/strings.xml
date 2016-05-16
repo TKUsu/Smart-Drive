@@ -4,7 +4,7 @@
 
     <string name="google_play_service_missing">裝置沒有安裝Google Play服務</string>
     <string name="app_name">Smart Driver</string>
-    <string name="title_activity_maps">Tap</string>
+    <string name="title_activity_maps">Smart Driver</string>
     <string name="endlocationnull">The end location is null!!</string>
     <string name="startlocationnull">The start location is null!!</string>
     <string name="failure_position">Get failure the position the former</string>

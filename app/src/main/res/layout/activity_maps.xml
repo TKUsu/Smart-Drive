@@ -23,21 +23,21 @@
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:alpha="0.8"
-            android:background="#000993f5"
+            android:background="@mipmap/ic_search2"
             android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:src="@mipmap/ic_search2">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:orientation="horizontal"
-                    android:background="#d2702e"
                     android:baselineAligned="false"
                     android:gravity="center">
 
@@ -70,8 +70,7 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:orientation="horizontal"
-                    android:gravity="center"
-                    android:background="#d2702e">
+                    android:gravity="center">
 
                     <AutoCompleteTextView
                         android:id="@+id/endautocomtxt"
@@ -101,7 +100,6 @@
                     style="@style/Widget.AppCompat.Button.Borderless"
                     android:layout_width="50dp"
                     android:layout_height="match_parent"
-                    android:background="@mipmap/ic_search"
                     android:elevation="20dp"
                     android:onClick="onNavigation"
                     android:translationZ="2dp" />
@@ -215,6 +213,13 @@
             android:layout_toStartOf="@+id/fab"
             android:src="@drawable/abc_btn_radio_to_on_mtrl_015"
             android:id="@+id/fabLocation"/>
+
+        <android.support.design.widget.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/fabTest"
+            android:layout_alignTop="@+id/fabLocation"
+            android:layout_centerHorizontal="true" />
     </RelativeLayout>
 
 </RelativeLayout>

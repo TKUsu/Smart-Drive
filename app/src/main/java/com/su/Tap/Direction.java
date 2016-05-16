@@ -116,14 +116,6 @@ public class Direction extends AsyncTask<Void, Void, String> {
             }
         }
 
-//        public Polyline getPolyLine(){
-//            try {
-//                return Ppolyline;
-//            }catch(NullPointerException e) {
-//                Log.e(Direction.class.getName(),e.getMessage());
-//                return null;
-//            }
-//        }
         public void deletePolyLine(){
             try {
                 dPolyline.remove();
@@ -132,14 +124,4 @@ public class Direction extends AsyncTask<Void, Void, String> {
             }
         }
     }
-//
-//    public void setPolyline(int color, int width){
-//        try{
-//        this.dcolor = color;
-//            this.lineWidth = width;
-//        }catch (NullPointerException e) {
-//            Log.e("Direction", "Direction isn't to set polyline color & Width");
-//        }
-//    }
-
 }

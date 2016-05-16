@@ -59,7 +59,7 @@ import java.util.Locale;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
-        GoogleMap.OnMarkerClickListener, Serializable {
+        GoogleMap.OnMarkerClickListener{
 
     private Direction direction;
 

@@ -62,7 +62,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                 cv = new ContentValues();
                 cv.put("lat", latLng.latitude);
                 cv.put("lng", latLng.longitude);
-                idtemp = db.insert("roadDBs", null, cv);
+                idtemp = db.insert(DATABASE_NAME, null, cv);
                 Log.e(TAG,"新增記錄成功" + idtemp + ":" + latLng.toString());
                 break;
             case "search":
@@ -73,7 +73,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                 cv = new ContentValues();
                 cv.put("lat", latLng.latitude);
                 cv.put("lng", latLng.longitude);
-                temptxt = db.insert("roadDBs", null, cv);
+                temptxt = db.insert(DATABASE_NAME, null, cv);
                 Log.e(TAG,"新增記錄成功" + temptxt + ":" + latLng.toString());
                 SqlQuery("SELECT * FROM " + DATABASE_NAME);
                 break;

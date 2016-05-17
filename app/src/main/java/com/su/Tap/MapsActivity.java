@@ -19,8 +19,6 @@ import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
-import android.support.v4.app.NavUtils;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -29,7 +27,6 @@ import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.appindexing.Action;
@@ -56,7 +53,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-import java.io.Serializable;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -145,7 +141,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         Theme();
 
-        fabControl();
+        fabControl(myLocaitonList);
 
         mButtonDown = (Button) findViewById(R.id.down);
         mSearchBar = (LinearLayout) findViewById(R.id.searchBar);
@@ -187,12 +183,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 //        TextView txt = (TextView)findViewById(R.id.txt);
-        if (mLocation != null) {
-//            txt.setText(mLocation.toString());
-            toast(mLocation.toString());
-        }else{
-            toast("Null");
-        }
     }
 
     @Override
@@ -278,7 +268,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Log.i(TAG_Activity, "onDestroy");
     }
     Boolean tempjudge = false;
-    private void fabControl() {
+    private void fabControl(final ArrayList<LatLng> output) {
         fabService = (FloatingActionButton) findViewById(R.id.fab);
         fabService.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -335,10 +325,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         fabTest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d("TestRoad",output.toString());
+                lineOptions = new PolylineOptions();
+                sqLiteHelper = new SQLiteHelper(MapsActivity.this);
+                sqLiteHelper.setData(sqLiteHelper.getWritableDatabase());
+                for (int i = 0;i < output.size();i++) {
+                    sqLiteHelper.sql("insert", output.get(i));
+                    Log.d("TestRoad_",output.get(i).toString());
+                }
                 if (!myLocationDrawJudgement) {
                     Log.d("SQL", "Drawing now~~~");
                     // Adding all the points in the route to LineOptions
-                    lineOptions.addAll(myLocaitonList);
+                    lineOptions.addAll(output);
                     lineOptions.width(lineWidth);  //導航路徑寬度
                     lineOptions.color(dcolor); //導航路徑顏色
                     polyline = mMap.addPolyline(lineOptions);
@@ -850,13 +848,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void processFinish(ArrayList<LatLng> output) {
         Log.d("TestRoad", "Direction list2:" + output.toString());
         this.myLocaitonList = output;
-        lineOptions = new PolylineOptions();
-        sqLiteHelper = new SQLiteHelper(MapsActivity.this);
-        sqLiteHelper.setData(sqLiteHelper.getWritableDatabase());
-        for (int i = 0;i < myLocaitonList.size();i++) {
-            myLocaitonList = sqLiteHelper.sql("insert", myLocaitonList.get(i));
-            Log.d("TestRoad",myLocaitonList.get(i).toString());
-        }
+        fabControl(output);
 //                try {
 //                    Log.d("SQL", "MapActivity list:" + myLocaitonList.toString());
 //                } catch (NullPointerException e) {

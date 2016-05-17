@@ -1,6 +1,7 @@
 package com.su.Tap;
 
 import android.annotation.TargetApi;
+import android.net.Uri;
 import android.support.design.widget.FloatingActionButton;
 
 import android.Manifest;
@@ -18,6 +19,7 @@ import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
@@ -30,6 +32,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -58,10 +62,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
-        GoogleMap.OnMarkerClickListener{
+        GoogleMap.OnMarkerClickListener, AsyncResponse {
 
     private Direction direction;
 
@@ -71,14 +76,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private AutoCompleteTextView startautoCompView = null, endautiComView = null;
     private LinearLayout mSearchBar;
     private Button mButtonDown;
-    private FloatingActionButton fabLocation,fabService,fabTest;
+    private FloatingActionButton fabLocation, fabService, fabTest;
 
     private LatLng start = null, end = null;
     private CharSequence place_startname = null, place_endname = null;
     private ArrayList<Marker> markers = new ArrayList<>();
     private ArrayList<LatLng> myLocaitonList = new ArrayList<>();
     public SQLiteHelper sqLiteHelper;
+    private Polyline polyline = null;
+    private PolylineOptions lineOptions;
+    int dcolor = R.color.currentMyRoad;
+    int lineWidth = 10;
 
+    private Boolean loactionchangejudge = false;
     private Boolean myLocationDrawJudgement = false;
     private Boolean startstop = true;
     private Boolean isRunning = false;
@@ -95,11 +105,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * Start Updates and Stop Updates buttons.
      */
     protected Boolean mRequestingLocationUpdates;
-    /**     2016/05/16
+    /**
+     * 2016/05/16
      * SDK is 23 up,So location access is error,has been access for user
      */
-    private static final int INITIAL_REQUEST=1337;
-    private static final String[] INITIAL_PERMS={
+    private static final int INITIAL_REQUEST = 1337;
+    private static final String[] INITIAL_PERMS = {
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.READ_CONTACTS
     };
@@ -111,6 +122,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected LocationRequest mLocationRequest;
 
     private final String TAG_Activity = "Activity is :";
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
     @TargetApi(Build.VERSION_CODES.M)
     @Override
@@ -122,8 +138,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         /**     2016/05/16
-                * SDK is 23 up,So location access is error,has been access for user
-                */
+         * SDK is 23 up,So location access is error,has been access for user
+         */
         if (!canAccessLocation() || !canAccessContacts())
             requestPermissions(INITIAL_PERMS, INITIAL_REQUEST);
 
@@ -167,6 +183,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         //使用該LOG可以知道當下是使用哪個執行緒,1為主執行緒
         Log.e("thread", "Map id=" + String.valueOf(Thread.currentThread().getId()));
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+//        TextView txt = (TextView)findViewById(R.id.txt);
+        if (mLocation != null) {
+//            txt.setText(mLocation.toString());
+            toast(mLocation.toString());
+        }else{
+            toast("Null");
+        }
     }
 
     @Override
@@ -174,21 +200,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onResume();
         if (mGoogleApiClient.isConnected() && mRequestingLocationUpdates)
             startLocationUpdates();
-        Log.i(TAG_Activity,"onResume");
+        Log.i(TAG_Activity, "onResume");
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         // Stop location updates to save battery, but don't disconnect the GoogleApiClient object.
-        if (mGoogleApiClient.isConnected())
-            stopLocationUpdates();
-        Log.i(TAG_Activity,"onPause");
+//        if (mGoogleApiClient.isConnected())
+//            stopLocationUpdates();
+        Log.i(TAG_Activity, "onPause");
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
         mGoogleApiClient.connect();
         if (mMap != null && !mMap.isMyLocationEnabled()) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
@@ -196,36 +225,67 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     != PackageManager.PERMISSION_GRANTED) return;
             mMap.setMyLocationEnabled(true);
         }
-        Log.i(TAG_Activity,"onStart");
+        Log.i(TAG_Activity, "onStart");
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Maps Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app URL is correct.
+                Uri.parse("android-app://com.su.Tap/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(client, viewAction);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        if (!isRunning)
-            mGoogleApiClient.disconnect();
-        Log.i(TAG_Activity,"onStop");
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Maps Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app URL is correct.
+                Uri.parse("android-app://com.su.Tap/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(client, viewAction);
+//        if (!isRunning)
+//            mGoogleApiClient.disconnect();
+        Log.i(TAG_Activity, "onStop");
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.disconnect();
     }
 
     @Override
-    protected void onDestroy(){
+    protected void onDestroy() {
         super.onDestroy();
         try {
+            mGoogleApiClient.disconnect();
             stopService(intentService);
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
         }
         isRunning = false;
         startstop = false;
-        Log.i(TAG_Activity,"onDestroy");
+        Log.i(TAG_Activity, "onDestroy");
     }
-
-    private void fabControl(){
+    Boolean tempjudge = false;
+    private void fabControl() {
         fabService = (FloatingActionButton) findViewById(R.id.fab);
         fabService.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mLocation != null) {
                     if (!startstop) {
+                        toast("Service Start");
                         fabService.setImageResource(R.drawable.ic_pause_dark);
                         isRunning = true;
                         startstop = true;
@@ -247,16 +307,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         });
                         thread.start();
                     } else {
+                        toast("Service Stop");
                         fabService.setImageResource(R.drawable.ic_play_dark);
                         isRunning = false;
                         startstop = false;
                         intentService = new Intent(MapsActivity.this, SQLService.class);
                         stopService(intentService);
                     }
-                }else
+                } else
                     toast("Please check your GPS is opened");
             }
-
         });
         fabLocation = (FloatingActionButton) findViewById(R.id.fabLocation);
         fabLocation.setOnClickListener(new View.OnClickListener() {
@@ -270,33 +330,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             }
         });
-        fabTest = (FloatingActionButton)findViewById(R.id.fabTest);
+
+        fabTest = (FloatingActionButton) findViewById(R.id.fabTest);
         fabTest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PolylineOptions lineOptions = new PolylineOptions();
-                Polyline polyline = null;
-                int dcolor = R.color.currentMyRoad;
-                int lineWidth = 10;
-                sqLiteHelper = new SQLiteHelper(MapsActivity.this);
-                sqLiteHelper.setData(sqLiteHelper.getWritableDatabase());
-                sqLiteHelper.sql("search",null,0);
-                myLocaitonList = sqLiteHelper.getlsit();
-                try{
-                    Log.d("SQL","MapActivity list:"+myLocaitonList.toString());
-                }catch (NullPointerException e){
-                    Log.d("SQL","MapActivity list is NULL");
-                }
-                if (!myLocationDrawJudgement){
-                    Log.d("SQL","Drawing now~~~");
+                if (!myLocationDrawJudgement) {
+                    Log.d("SQL", "Drawing now~~~");
                     // Adding all the points in the route to LineOptions
                     lineOptions.addAll(myLocaitonList);
                     lineOptions.width(lineWidth);  //導航路徑寬度
                     lineOptions.color(dcolor); //導航路徑顏色
                     polyline = mMap.addPolyline(lineOptions);
                     myLocationDrawJudgement = true;
-                }else {
-                    Log.d("SQL","Polyline clean~~~");
+                } else {
+                    Log.d("SQL", "Polyline clean~~~");
                     if (polyline != null)
                         polyline.remove();
                     myLocationDrawJudgement = false;
@@ -306,7 +354,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     /**
-     *              Map
+     * Map
+     *
      * @param googleMap
      */
     @Override
@@ -327,26 +376,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
                 this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
-        }mMap.setMyLocationEnabled(true);
+        }
+        mMap.setMyLocationEnabled(true);
         if (mLocation != null) {
             Log.e(TAG, "Fist Location");
             if (ButtonNumber == 0)
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mLatLng(), 18));
             else
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(mLatLng()));
-        } else {
-            Log.e(TAG, "Get Last Known Location");
-
-            Location location = mLocationmgr.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            if (location == null)
-                location = mLocationmgr.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            if (location != null) {
-                if (ButtonNumber == 0)
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 18));
-                else
-                    mMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
-            } else
-                toast(String.valueOf(R.string.failure_position));
         }
     }
 
@@ -490,6 +527,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
     public void onNavigation(View view) {
         String starttmp, endtmp;
+        String temp = null;
         starttmp = startautoCompView.getText().toString();
         endtmp = endautiComView.getText().toString();
         if (!starttmp.equals("")) {
@@ -511,7 +549,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     end = getLatLongFromAddress(endtmp);
                 SearchBarRideUp();
                 direction = new Direction(start, end, mMap);
-                direction.execute();
+                direction.delegate = this;
+                try {
+                    direction.execute().get();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                }
             }
         } else {
             if (!place_startname.equals(starttmp))
@@ -520,7 +565,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 end = getLatLongFromAddress(endtmp);
             SearchBarRideUp();
             direction = new Direction(start, end, mMap);
-            direction.execute();
+            direction.delegate = this;
+            try {
+                direction.execute().get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
         }
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(start, 18));
     }
@@ -560,7 +612,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     /**
      * The desired interval for location updates. Inexact. Updates may be more or less frequent.
      */
-    protected static final long UPDATE_INTERVAL_IN_MILLISECONDS = 1000;
+    protected static final long UPDATE_INTERVAL_IN_MILLISECONDS = 100;
     public static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = UPDATE_INTERVAL_IN_MILLISECONDS / 2;
     // Keys for storing activity state in the Bundle.
     protected final static String REQUESTING_LOCATION_UPDATES_KEY = "requesting-location-updates-key";
@@ -583,6 +635,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             if (savedInstanceState.keySet().contains(LAST_UPDATED_TIME_STRING_KEY))
                 mLastUpdateTime = savedInstanceState.getString(LAST_UPDATED_TIME_STRING_KEY);
         }
+        try{toast("Updating values from bundle"+mLocation.toString());}catch (NullPointerException e){
+
+        }
     }
 
     /**
@@ -590,6 +645,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
     protected synchronized void buildGoogleApiClient() {
         Log.i(TAG, "Building GoogleApiClient");
+        toast("Building GoogleApiClient");
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
@@ -601,6 +657,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void createLocationRequest() {
         mLocationRequest = new LocationRequest();
         Log.i(TAG, "Create Location Request");
+        toast("Create Location Request");
         // Sets the desired interval for active location updates. This interval is
         // inexact. You may not receive updates at all if no location sources are available, or
         // you may receive them slower than requested. You may also receive updates faster than
@@ -629,6 +686,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         Log.i(TAG, "Connected to GoogleApiClient");
+        toast("Connected to GoogleApiClient");
     }
 
     /**
@@ -636,6 +694,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
     protected void stopLocationUpdates() {
         Log.i(TAG, "Stop Location Update");
+
         // It is a good practice to remove location requests when the activity is in a paused or
         // stopped state. Doing so helps battery performance and is especially
         // recommended in applications that request frequent location updates.
@@ -680,6 +739,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (mRequestingLocationUpdates) {
             startLocationUpdates();
         }
+        toast("Connected to GoogleApiClient"+mLocation.toString());
     }
 
     @Override
@@ -700,9 +760,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onLocationChanged(Location location) {
         Log.i(TAG, "On Location Changed");
+        toast("On Location Changed" + location.toString()+mLastUpdateTime);
         mLocation = location;
         mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
-        Log.i(TAG, "Location : "+location.toString()+"Update Time: "+mLastUpdateTime);
+        Log.i(TAG, "Location : " + location.toString() + "Update Time: " + mLastUpdateTime);
     }
 
     /**
@@ -715,13 +776,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onSaveInstanceState(savedInstanceState);
     }
 
-    /**====================================================================*/
+    /**
+     * ====================================================================
+     */
 
-    public LatLng mLatLng(){
-        return new LatLng(mLocation.getLatitude(),mLocation.getLongitude());
+    public LatLng mLatLng() {
+        return new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
     }
 
-    private void Theme(){
+    private void Theme() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             Window window = getWindow();
             // Translucent status bar
@@ -735,7 +798,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    private int getNavigationHeight(Context context){
+    private int getNavigationHeight(Context context) {
         Resources resources = context.getResources();
         int resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
         if (resourceId > 0) {
@@ -744,40 +807,61 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return 0;
     }
 
-    private int getStatusHeight(Context context,int type){
+    private int getStatusHeight(Context context, int type) {
         Resources resources = context.getResources();
         int resourceId = resources.getIdentifier("status_bar_height", "dimen", "android");
         if (resourceId > 0) {
             if (type == 0)
                 return resources.getDimensionPixelSize(resourceId)
                         + mSearchBar.getHeight();
-            else if (type ==1)
+            else if (type == 1)
                 return resources.getDimensionPixelSize(resourceId)
                         + mSearchBar.getHeight();
         }
         return 0;
     }
-    public void toast(String tmp){
+
+    public void toast(String tmp) {
         try {
             Toast.makeText(MapsActivity.this, tmp, Toast.LENGTH_LONG).show();
-        }catch (NullPointerException e){
-            Log.e("MapActivity toast",e.toString());
+        } catch (NullPointerException e) {
+            Log.e("MapActivity toast", e.toString());
         }
     }
 
-    /**     2016/05/16
+    /**
+     * 2016/05/16
      * SDK is 23 up,So location access is error,has been access for user
      */
     private boolean canAccessContacts() {
-        return(hasPermission(Manifest.permission.READ_CONTACTS));
+        return (hasPermission(Manifest.permission.READ_CONTACTS));
     }
 
     private boolean canAccessLocation() {
-        return(hasPermission(Manifest.permission.ACCESS_FINE_LOCATION));
+        return (hasPermission(Manifest.permission.ACCESS_FINE_LOCATION));
     }
+
     @TargetApi(Build.VERSION_CODES.M)
     private boolean hasPermission(String perm) {
-        return(PackageManager.PERMISSION_GRANTED==checkSelfPermission(perm));
+        return (PackageManager.PERMISSION_GRANTED == checkSelfPermission(perm));
+    }
+
+    @Override
+    public void processFinish(ArrayList<LatLng> output) {
+        Log.d("TestRoad", "Direction list2:" + output.toString());
+        this.myLocaitonList = output;
+        lineOptions = new PolylineOptions();
+        sqLiteHelper = new SQLiteHelper(MapsActivity.this);
+        sqLiteHelper.setData(sqLiteHelper.getWritableDatabase());
+        for (int i = 0;i < myLocaitonList.size();i++) {
+            myLocaitonList = sqLiteHelper.sql("insert", myLocaitonList.get(i));
+            Log.d("TestRoad",myLocaitonList.get(i).toString());
+        }
+//                try {
+//                    Log.d("SQL", "MapActivity list:" + myLocaitonList.toString());
+//                } catch (NullPointerException e) {
+//                    Log.d("SQL", "MapActivity list is NULL");
+//                }
     }
     /**     */
 }

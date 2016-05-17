@@ -4,4 +4,4 @@
     android:layout_height="wrap_content"
     android:padding="10dp"
     android:id="@+id/autocompleteText"
-    android:background="@drawable/common_google_signin_btn_text_light_normal" />
+    android:background="@android:color/holo_blue_dark" />

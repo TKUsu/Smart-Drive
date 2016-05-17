@@ -23,15 +23,14 @@
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:alpha="0.8"
-            android:background="@mipmap/ic_search2"
+            android:background="@mipmap/searchbar"
             android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:orientation="horizontal"
-                android:src="@mipmap/ic_search2">
+                android:orientation="horizontal">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -60,7 +59,7 @@
                         style="@style/Widget.AppCompat.Button.Small"
                         android:layout_width="45dp"
                         android:layout_height="match_parent"
-                        android:background="@mipmap/ic_places"
+                        android:background="@mipmap/ic_search4"
                         android:onClick="onSearch" />
 
                 </LinearLayout>
@@ -91,7 +90,7 @@
                         style="@style/Widget.AppCompat.Button.Small"
                         android:layout_width="45dp"
                         android:layout_height="match_parent"
-                        android:background="@mipmap/ic_places"
+                        android:background="@mipmap/ic_search4"
                         android:onClick="onSearch" />
                 </LinearLayout>
 
@@ -219,7 +218,26 @@
             android:layout_height="wrap_content"
             android:id="@+id/fabTest"
             android:layout_alignTop="@+id/fabLocation"
-            android:layout_centerHorizontal="true" />
+            android:layout_toStartOf="@+id/fabLocation"
+            android:layout_marginEnd="16dp"
+            android:src="@mipmap/ic_record" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Large Text"
+            android:id="@+id/txt"
+            android:layout_above="@+id/fab"
+            android:layout_alignParentStart="true" />
+        <!--<android.support.design.widget.FloatingActionButton-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:id="@+id/fabTest2"-->
+            <!--android:layout_alignTop="@+id/fabTest"-->
+            <!--android:layout_toStartOf="@+id/fabTest"-->
+            <!--android:layout_marginEnd="16dp"-->
+            <!--android:src="@mipmap/ic_record" />-->
     </RelativeLayout>
 
 </RelativeLayout>

@@ -17,7 +17,6 @@ import java.util.HashMap;
  */
 public class SQLService extends Service {
 
-    private int id = 0;
     public static LatLng MyLatLng;
     private final String TAG = "SQL";
     private static SQLiteHelper sqLiteHelper;
@@ -41,7 +40,6 @@ public class SQLService extends Service {
 
     @Override
     public int onStartCommand(final Intent intent, int flags, int startId) {
-        Toast.makeText(this, "Service start", Toast.LENGTH_SHORT).show();
         sqLiteHelper = new SQLiteHelper(this);
         sqLiteHelper.setData(sqLiteHelper.getWritableDatabase());
         Thread mServiceThread = new Thread(new Runnable() {
@@ -54,8 +52,7 @@ public class SQLService extends Service {
                     Lng = bundle.getDouble("Lng");
                     MyLatLng = new LatLng(Lat, Lng);
                     Log.e(TAG, "Service: " + MyLatLng.toString());
-                    id = sqLiteHelper.getID();
-                    sqLiteHelper.sql("insert", new LatLng(Lat, Lng),id);
+                    sqLiteHelper.sql("insert", new LatLng(Lat, Lng));
                 }catch (NullPointerException e){
                     Log.e(TAG, "Service's Location isn't point");
                 }
@@ -73,7 +70,6 @@ public class SQLService extends Service {
     @Override
     public void onDestroy(){
         super.onDestroy();
-        Toast.makeText(this, "Service stop", Toast.LENGTH_SHORT).show();
     }
 }
 

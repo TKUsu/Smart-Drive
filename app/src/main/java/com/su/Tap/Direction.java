@@ -16,12 +16,14 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
-public class Direction extends AsyncTask<Void, Void, String> {
+public class Direction extends AsyncTask<Void, Void, String> implements AsyncResponse{
     // Downloading data in non-ui thread
 
     DirectionAPI DctAPI = new DirectionAPI();
     public ParserTask parserTask = new ParserTask();
+    public AsyncResponse delegate = null;
 
     private LatLng start, end;
     private GoogleMap dMap;
@@ -30,6 +32,7 @@ public class Direction extends AsyncTask<Void, Void, String> {
     public static int lineWidth = 10;
 
     private PolylineOptions lineOptions;
+    private ArrayList<LatLng> arrayList = new ArrayList();
 
     public Direction(LatLng start, LatLng end, GoogleMap mMap) {
         this.start = start;
@@ -56,14 +59,29 @@ public class Direction extends AsyncTask<Void, Void, String> {
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
         // Invokes the thread for parsing the JSON data
-        parserTask.execute(result);
+        try {
+            parserTask.execute(result).get();
+            parserTask.pdelegate = this;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
     }
 
+    @Override
+    public void processFinish(ArrayList<LatLng> output) {
+        this.arrayList = output;
+        delegate.processFinish(arrayList);
+        Log.d("TestRoad","Direction list1:"+arrayList.toString());
+    }
     /** 解析JSON格式 **/
     public class ParserTask extends
             AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
         Polyline dPolyline = null;
+        ArrayList<LatLng> points = null;
 
+        public AsyncResponse pdelegate = null;
 
         // Parsing the data in non-ui thread
         @Override
@@ -83,7 +101,7 @@ public class Direction extends AsyncTask<Void, Void, String> {
         // Executes in UI thread, after the parsing process
         @Override
         protected void onPostExecute(List<List<HashMap<String, String>>> result) {
-            ArrayList<LatLng> points = null;
+            super.onPostExecute(result);
             int i,j;
             try {
                 // Traversing through all the routes
@@ -100,7 +118,7 @@ public class Direction extends AsyncTask<Void, Void, String> {
                         LatLng position = new LatLng(lat, lng);
                         points.add(position);
                     }
-                    Log.d("SQL","Direction list:"+points.toString());
+//                    Log.d("SQL","Direction list:"+points.toString());
                     // Adding all the points in the route to LineOptions
                     lineOptions.addAll(points);
                     lineOptions.width(lineWidth);  //導航路徑寬度
@@ -108,11 +126,11 @@ public class Direction extends AsyncTask<Void, Void, String> {
                 }
                 // Drawing polyline in the Google Map for the i-th route
                 dPolyline = dMap.addPolyline(lineOptions);
+                pdelegate.processFinish(points);
             }catch (NullPointerException e){
                 Log.e(MapsActivity.class.getName(),e.getMessage());
             }
         }
-
         public void deletePolyLine(){
             try {
                 dPolyline.remove();

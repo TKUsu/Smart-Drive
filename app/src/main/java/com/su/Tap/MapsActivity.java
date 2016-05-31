@@ -51,8 +51,6 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -63,7 +61,7 @@ import java.util.concurrent.ExecutionException;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
-        GoogleMap.OnMarkerClickListener, AsyncResponse {
+        GoogleMap.OnMarkerClickListener{
 
     private Direction direction;
 
@@ -73,21 +71,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private AutoCompleteTextView startautoCompView = null, endautiComView = null;
     private LinearLayout mSearchBar;
     private Button mButtonDown;
-    private FloatingActionButton fabLocation, fabService, fabTest,fabTest2;
+    private FloatingActionButton fabLocation, fabService;
     private TextView txt;
 
     private LatLng start = null, end = null;
     private CharSequence place_startname = null, place_endname = null;
     private ArrayList<Marker> markers = new ArrayList<>();
     private ArrayList<LatLng> myLocaitonList = new ArrayList<>();
-    public SQLiteHelper sqLiteHelper;
-    private Polyline polyline = null;
-    private PolylineOptions lineOptions;
-    int dcolor = R.color.smartDriverColor2;
-    int lineWidth = 10;
-
-    private Boolean loactionchangejudge = false;
-    private Boolean myLocationDrawJudgement = false;
     private Boolean startstop = false;
     private Boolean isRunning = false;
     public int ButtonNumber = 0;
@@ -249,8 +239,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Uri.parse("android-app://com.su.Tap/http/host/path")
         );
         AppIndex.AppIndexApi.end(client, viewAction);
-//        if (!isRunning)
-//            mGoogleApiClient.disconnect();
         Log.i(TAG_Activity, "onStop");
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -269,9 +257,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         startstop = false;
         Log.i(TAG_Activity, "onDestroy");
     }
-    Boolean tempjudge = false;
-    int temp = 0;
-    ArrayList<LatLng> arrayListtemp = new ArrayList<>();
+
     private void fabControl(final ArrayList<LatLng> output) {
         fabService = (FloatingActionButton) findViewById(R.id.fab);
         fabService.setOnClickListener(new View.OnClickListener() {
@@ -286,8 +272,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         thread = new Thread(new Runnable() {
                             @Override
                             public void run() {
-//                                String s = "("+mLocation.getLatitude()+"),("+mLocation.getLatitude()+")";
-//                                txt.setText(s);
                                 while (isRunning) {
                                     intentService = new Intent(MapsActivity.this, SQLService.class);
                                     intentService.putExtra("Lat", mLocation.getLatitude());
@@ -314,92 +298,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     toast("Please check your GPS is opened");
             }
         });
-        fabTest = (FloatingActionButton) findViewById(R.id.fabTest);
-        fabTest.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-//                Log.d("TestRoad",output.toString());
-//                for (int i = 0;i < output.size();i++) {
-//                    sqLiteHelper.sql("insert", output.get(i));
-//                    Log.d("TestRoad_",output.get(i).toString());
-//                }
-                if (!myLocationDrawJudgement) {
-                    lineOptions = new PolylineOptions();
-                    Log.d("SQL", "Drawing now~~~");
-                    //Adding all the points in the route to LineOptions
-                    lineOptions.addAll(output);
-                    lineOptions.width(lineWidth);  //導航路徑寬度
-                    lineOptions.color(dcolor); //導航路徑顏色
-                    polyline = mMap.addPolyline(lineOptions);
-                    myLocationDrawJudgement = true;
-                }else if(myLocationDrawJudgement){
-                    polyline.remove();
-                    myLocationDrawJudgement = false;
-                }
-//                temp++;
-//                toast("change");
-//                Log.d("SQL", String.valueOf(temp));
-            }
-        });
-//        fabTest2 = (FloatingActionButton)findViewById(R.id.fabTest2);
-//        fabTest2.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                for (int i = 0;i < output.size();i++) {
-//                    arrayListtemp.add(output.get(i));
-//                }
-//            }
-//        });
         fabLocation = (FloatingActionButton) findViewById(R.id.fabLocation);
         fabLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                fabTest2.hide();
-//                fabTest.hide();
-
                 try {
                     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mLatLng(), 18));
                 } catch (NullPointerException e) {
                     toast("Please check your GPS is opened");
                     Log.e("My Location", e.toString());
                 }
-//                if (temp == 0) {
-
-//                    sqLiteHelper = new SQLiteHelper(MapsActivity.this, "roadDB");
-//                    sqLiteHelper.setData(sqLiteHelper.getWritableDatabase());
-////                    ArrayList<LatLng> arrayList = new ArrayList<LatLng>();
-//                    for (int i = 0;i < output.size();i++) {
-//                        sqLiteHelper.sql("insert",output.get(i));
-//                        Log.d("TestRoad_",output.get(i).toString());
-////                        arrayListtemp.add(output.get(i));
-//                    }
-
-//                    lineOptions = new PolylineOptions();
-//                    Log.d("SQL", "Drawing now~~~");
-//                     Adding all the points in the route to LineOptions
-//                    lineOptions.addAll(arrayList);
-//                    lineOptions.width(lineWidth);  //導航路徑寬度
-//                    lineOptions.color(dcolor); //導航路徑顏色
-//                    polyline = mMap.addPolyline(lineOptions);
-//                    myLocationDrawJudgement = true;
-//                }else if(temp == 1){
-//                    sqLiteHelper = new SQLiteHelper(MapsActivity.this, "roadDB2");
-//                    sqLiteHelper.setData(sqLiteHelper.getWritableDatabase());
-////                    ArrayList<LatLng> arrayList = new ArrayList<LatLng>();
-//                    for (int i = 0;i < output.size();i++) {
-//                        sqLiteHelper.sql("insert", output.get(i));
-//                        Log.d("TestRoad_",output.get(i).toString());
-//                    }
-//                    lineOptions = new PolylineOptions();
-//                    Log.d("SQL", "Drawing now~~~");
-                    // Adding all the points in the route to LineOptions
-//                    lineOptions.addAll(arrayList);
-//                    lineOptions.width(lineWidth);  //導航路徑寬度
-//                    lineOptions.color(dcolor); //導航路徑顏色
-//                    polyline = mMap.addPolyline(lineOptions);
-//                    myLocationDrawJudgement = true;
-//                }
             }
         });
     }
@@ -576,10 +484,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     /**
      * Navigation    判斷是否為空值、直接輸入文字或是選取地點
      */
-    int judgenavigation = 0;
     public void onNavigation(View view) {
         String starttmp, endtmp;
-        String temp = null;
         starttmp = startautoCompView.getText().toString();
         endtmp = endautiComView.getText().toString();
         if (!starttmp.equals("")) {
@@ -601,7 +507,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     end = getLatLongFromAddress(endtmp);
                 SearchBarRideUp();
                 direction = new Direction(start, end, mMap);
-                direction.delegate = this;
                 try {
                     direction.execute().get();
                 } catch (InterruptedException e) {
@@ -617,7 +522,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 end = getLatLongFromAddress(endtmp);
             SearchBarRideUp();
             direction = new Direction(start, end, mMap);
-            direction.delegate = this;
             try {
                 direction.execute().get();
             } catch (InterruptedException e) {
@@ -627,11 +531,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(start, 18));
-        if (judgenavigation == 0) {
-            draw(1);
-//            draw(2);
-            judgenavigation++;
-        }
     }
 
     private void ShowPercent() {
@@ -899,52 +798,5 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @TargetApi(Build.VERSION_CODES.M)
     private boolean hasPermission(String perm) {
         return (PackageManager.PERMISSION_GRANTED == checkSelfPermission(perm));
-    }
-
-    @Override
-    public void processFinish(ArrayList<LatLng> output) {
-        Log.d("TestRoad", "Direction list2:" + output.toString());
-        this.myLocaitonList = output;
-        fabControl(output);
-//                try {
-//                    Log.d("SQL", "MapActivity list:" + myLocaitonList.toString());
-//                } catch (NullPointerException e) {
-//                    Log.d("SQL", "MapActivity list is NULL");
-//                }
-    }
-
-    private void draw(int i){
-        switch (i) {
-            case 1:
-                sqLiteHelper = new SQLiteHelper(MapsActivity.this, "roadDB");
-                break;
-//            case 2:
-////                sqLiteHelper = new SQLiteHelper(MapsActivity.this, "roadDB2");
-//                PolylineOptions lineOptions = new PolylineOptions();
-//                Log.d("SQL", "Drawing now~~~");
-//                // Adding all the points in the route to LineOptions
-//                lineOptions.addAll(arrayListtemp);
-//                lineOptions.width(lineWidth);  //導航路徑寬度
-//                lineOptions.color(dcolor); //導航路徑顏色
-//                polyline = mMap.addPolyline(lineOptions);
-//                break;
-//            case 3:
-//                sqLiteHelper = new SQLiteHelper(MapsActivity.this, "roadDB3");
-//                break;
-//            case 4:
-//                sqLiteHelper = new SQLiteHelper(MapsActivity.this, "roadDB4");
-//                break;
-        }
-        sqLiteHelper.setData(sqLiteHelper.getWritableDatabase());
-        ArrayList<LatLng> arrayList = new ArrayList<LatLng>();
-        arrayList = sqLiteHelper.sql("search", null);
-        lineOptions = new PolylineOptions();
-        Log.d("SQL", "Drawing now~~~");
-        // Adding all the points in the route to LineOptions
-        lineOptions.addAll(arrayList);
-        lineOptions.width(lineWidth);  //導航路徑寬度
-        lineOptions.color(dcolor); //導航路徑顏色
-        polyline = mMap.addPolyline(lineOptions);
-        myLocationDrawJudgement = true;
     }
 }

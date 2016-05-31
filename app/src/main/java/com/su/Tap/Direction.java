@@ -118,7 +118,6 @@ public class Direction extends AsyncTask<Void, Void, String> implements AsyncRes
                         LatLng position = new LatLng(lat, lng);
                         points.add(position);
                     }
-//                    Log.d("SQL","Direction list:"+points.toString());
                     // Adding all the points in the route to LineOptions
                     lineOptions.addAll(points);
                     lineOptions.width(lineWidth);  //導航路徑寬度

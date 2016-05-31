@@ -20,23 +20,39 @@ import java.util.HashMap;
  */
 public class SQLiteHelper extends SQLiteOpenHelper {
 
-    private static final String DATABASE_NAME = "roadDB";
-    private static final String DATABASE2_NAME = "roadDB2";
+    private static String DATABASE_NAME = "roadDB";
+//    private static final String DATABASE2_NAME = "roadDB2";
     private static final int DATABASE_VERSION = 1;
 
     private SQLiteDatabase db;
 
     private final String TAG = "SQL";
 
-    public SQLiteHelper(Context context) {
+    public SQLiteHelper(Context context, String roadDB) {
         //透過建構子MyDBHelper直接呼叫父類別建構子來建立參數的資料庫
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
-
+        this.DATABASE_NAME = roadDB;
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE "+DATABASE_NAME+" (" +
+        db.execSQL("CREATE TABLE roadDB (" +
+                " _ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+                " lat DOUBLE NOT NULL," +
+                " lng DOUBLE NOT NULL)");
+        db.execSQL("CREATE TABLE roadDB2 (" +
+                " _ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+                " lat DOUBLE NOT NULL," +
+                " lng DOUBLE NOT NULL)");
+        db.execSQL("CREATE TABLE roadDB3 (" +
+                " _ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+                " lat DOUBLE NOT NULL," +
+                " lng DOUBLE NOT NULL)");
+        db.execSQL("CREATE TABLE roadDB4 (" +
+                " _ID INTEGER PRIMARY KEY AUTOINCREMENT," +
+                " lat DOUBLE NOT NULL," +
+                " lng DOUBLE NOT NULL)");
+        db.execSQL("CREATE TABLE roadDB5 (" +
                 " _ID INTEGER PRIMARY KEY AUTOINCREMENT," +
                 " lat DOUBLE NOT NULL," +
                 " lng DOUBLE NOT NULL)");
@@ -57,14 +73,14 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         ContentValues cv;
 //        int count, id;
         switch (temp) {
-            case "insert":
-                long idtemp;
-                cv = new ContentValues();
-                cv.put("lat", latLng.latitude);
-                cv.put("lng", latLng.longitude);
-                idtemp = db.insert(DATABASE_NAME, null, cv);
-                Log.e(TAG,"新增記錄成功" + idtemp + ":" + latLng.toString());
-                break;
+//            case "insert":
+//                long idtemp;
+//                cv = new ContentValues();
+//                cv.put("lat", latLng.latitude);
+//                cv.put("lng", latLng.longitude);
+//                idtemp = db.insert(DATABASE_NAME, null, cv);
+//                Log.e(TAG,"新增記錄成功"+ DATABASE_NAME + "  " + idtemp + ":" + latLng.toString());
+//                break;
             case "search":
                 SqlQuery("SELECT * FROM " + DATABASE_NAME);
                 return list;

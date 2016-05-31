@@ -5,12 +5,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Created by su on 2016/5/9.
@@ -40,7 +36,7 @@ public class SQLService extends Service {
 
     @Override
     public int onStartCommand(final Intent intent, int flags, int startId) {
-        sqLiteHelper = new SQLiteHelper(this);
+        sqLiteHelper = new SQLiteHelper(this, "roadDB5");
         sqLiteHelper.setData(sqLiteHelper.getWritableDatabase());
         Thread mServiceThread = new Thread(new Runnable() {
             @Override

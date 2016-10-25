@@ -2,7 +2,7 @@
 
 Language：Android
 
-API-
+Tutorial-
 
 Google Map. Google Places API. Google Places Picker.
 

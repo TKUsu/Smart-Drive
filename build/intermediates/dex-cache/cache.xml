@@ -1,2 +1,236 @@
 <?xml version="1.0" encoding="utf-8"?>
-<items version="2" />
+<items version="2" >
+
+    <item
+        jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-ads/8.4.0/jars/classes.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="b5e7892fb0708e792e0e933c4c0a0ca0ac7831fb">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/com.google.android.gms-play-services-ads-8.4.0_eefe3506e942a523822682cfde5536c01c373740.jar" />
+    </item>
+    <item
+        jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-identity/8.4.0/jars/classes.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="b82b8e847173c28efffcd291b2a0b1ae9ad17fa4">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/com.google.android.gms-play-services-identity-8.4.0_ff8e3ed00b932624a68d7ddefcc15218f821d086.jar" />
+    </item>
+    <item
+        jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-maps/8.4.0/jars/classes.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="04de44f90606c77f3b28cf44861f306290505aac">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/com.google.android.gms-play-services-maps-8.4.0_8b70ef44461abbd5fa1ed5794746128dd06b71d9.jar" />
+    </item>
+    <item
+        jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/incremental-classes/debug/instant-run-bootstrap.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="e46e6aa1a24a54b7b5d481c97d9762465489bde5">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/instant-run-bootstrap_95e89803d1febd60ca049ccececf30fd2c08319c.jar" />
+    </item>
+    <item
+        jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-location/8.4.0/jars/classes.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="a8412b654dab86d57bf90683367488211c8a81f1">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/com.google.android.gms-play-services-location-8.4.0_2539b2cc13b13d23427ae33c65527fade29b05fe.jar" />
+    </item>
+    <item
+        jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-drive/8.4.0/jars/classes.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="b36f30ac5ee5d5214f4b1e2ac49f11889d58e71a">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/com.google.android.gms-play-services-drive-8.4.0_3325340dde0dfd3d0816ea24b1297ecfc8353e64.jar" />
+    </item>
+    <item
+        jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-plus/8.4.0/jars/classes.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="1a78298e7724d5440d210bcb946b3493250d354d">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/com.google.android.gms-play-services-plus-8.4.0_1084dee7f115bb5fb528978045f252aea57fb858.jar" />
+    </item>
+    <item
+        jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-appindexing/8.4.0/jars/classes.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="65d086ee9daaf87b5af62ad24471edafa433354c">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/com.google.android.gms-play-services-appindexing-8.4.0_8509cba8191b303d9bcd9302a93647599dc38ef6.jar" />
+    </item>
+    <item
+        jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-gcm/8.4.0/jars/classes.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="2d7fe76982677315c4dc4edfb459c8ca718a9d4c">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/com.google.android.gms-play-services-gcm-8.4.0_2cebb179078cb4e01f97d847ce5698020088870d.jar" />
+    </item>
+    <item
+        jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/exploded-aar/com.android.support/recyclerview-v7/23.1.0/jars/classes.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="3f151e49c316a5ab2c065969a3b3b55ef9b393fc">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/com.android.support-recyclerview-v7-23.1.0_94cb1a993a1f41149b047a3de722d31fe6e64840.jar" />
+    </item>
+    <item
+        jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-basement/8.4.0/jars/classes.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="8e673cdfadd8f2d98fdb2fda2285c30f6e449782">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/com.google.android.gms-play-services-basement-8.4.0_33281a12c2370e744e17c90bb2387efde2bdefb0.jar" />
+    </item>
+    <item
+        jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-measurement/8.4.0/jars/classes.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="613298b7aa012f121ce542881c0a599ebd8078f2">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/com.google.android.gms-play-services-measurement-8.4.0_faf633b8520cc13a48b11a1ae7f7b1bb56c6f8d6.jar" />
+    </item>
+    <item
+        jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-wallet/8.4.0/jars/classes.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="f2df436a8f02ce7e4d7d209671fc45f97c470f0e">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/com.google.android.gms-play-services-wallet-8.4.0_a483c6bb0f3850238bea064200b2622253055c21.jar" />
+    </item>
+    <item
+        jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-wearable/8.4.0/jars/classes.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="e167a34eaca0b31704212f43f9576ea84e05046f">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/com.google.android.gms-play-services-wearable-8.4.0_464047e22e46706ff1dae7e6757497e5d81a6725.jar" />
+    </item>
+    <item
+        jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-vision/8.4.0/jars/classes.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="dfecc4d835cdabcdecf7e95f0d20a3ef1e9d8ef4">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/com.google.android.gms-play-services-vision-8.4.0_9091c223235aca49c507094e92347048d98df4e5.jar" />
+    </item>
+    <item
+        jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/exploded-aar/com.android.support/design/23.1.0/jars/classes.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="19026d31f5d3ae868db81319671a642be5fbba08">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/com.android.support-design-23.1.0_c63700759d019ca553ea64dbfcf48e4d0fbe337f.jar" />
+    </item>
+    <item
+        jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-safetynet/8.4.0/jars/classes.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="0194a7409c40de94fb539d4ad9928ec5d47afeb7">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/com.google.android.gms-play-services-safetynet-8.4.0_5f4871984a63835fa736b965feb8d538c7624e08.jar" />
+    </item>
+    <item
+        jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-panorama/8.4.0/jars/classes.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="08d34b2d135c1cc96ab506fd8bf6916d1e2f391a">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/com.google.android.gms-play-services-panorama-8.4.0_298390120e03cde46365efadcb525e8e1a95124b.jar" />
+    </item>
+    <item
+        jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/incremental-runtime-classes/debug/instant-run.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="b7370f923269ee2344782429e5933872e0c598e0">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/instant-run_1cde6903bb5cc27483511baa2dd1f6c4ebd03a84.jar" />
+    </item>
+    <item
+        jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/exploded-aar/com.android.support/mediarouter-v7/23.0.0/jars/libs/internal_impl-23.0.0.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="03d38bb042efe3e5ce27ba66b729a9523c36d8fe">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/internal_impl-23.0.0_6f9d29941a7188a46305e8542506a71e8b074d02.jar" />
+    </item>
+    <item
+        jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.1.0/jars/classes.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="57ae0d750ff83f0c738d21720224ac7ea866a094">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/com.android.support-appcompat-v7-23.1.0_ce4dec4544065a056159113cabde0ab02b55ccad.jar" />
+    </item>
+    <item
+        jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-auth/8.4.0/jars/classes.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="966e5771a5a2ebfb31bf00d7cd6cd2546d245517">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/com.google.android.gms-play-services-auth-8.4.0_89d834a57c6e34d5bbff8ff7444876b8e36aa9d8.jar" />
+    </item>
+    <item
+        jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/exploded-aar/com.android.support/support-v4/23.1.0/jars/libs/internal_impl-23.1.0.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="8716243bf04bae8d6c9ca94d27b9a9be7236f0a3">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/internal_impl-23.1.0_536c429d6f73b2eff65fbe629c6e1272bcddf397.jar" />
+    </item>
+    <item
+        jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/exploded-aar/com.android.support/mediarouter-v7/23.0.0/jars/classes.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="d358b3dd49a7c67844622dcbc9cf4339e13952ce">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/com.android.support-mediarouter-v7-23.0.0_13708fde3a8704b90f98990524f4330ecf986d29.jar" />
+    </item>
+    <item
+        jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-base/8.4.0/jars/classes.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="fef2b3e4b6b1b0e5fe7b69fa137a5fa55a3182ab">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/com.google.android.gms-play-services-base-8.4.0_46a5a43ac9897faa99b4dbb1ee4cdd58cabefe8a.jar" />
+    </item>
+    <item
+        jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-cast/8.4.0/jars/classes.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="551e78f21acf69ebfb489c0e79647824c838013e">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/com.google.android.gms-play-services-cast-8.4.0_1d589872e99f015f3c9b81874dde76bb45559a27.jar" />
+    </item>
+    <item
+        jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-games/8.4.0/jars/classes.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="3a364cc6b698d1b3b2d284f64618daaa7fe77ddf">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/com.google.android.gms-play-services-games-8.4.0_ec013b3d67c1a68be9173eac29c695520ee83876.jar" />
+    </item>
+    <item
+        jar="/Users/sujustin/Library/Android/sdk/extras/android/m2repository/com/android/support/support-annotations/23.1.0/support-annotations-23.1.0.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="92e3fc113ec3ee36b64603a38857b95700025633">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/support-annotations-23.1.0_2a7ff0e0e41902a8ff98c855025857853b006b11.jar" />
+    </item>
+    <item
+        jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-analytics/8.4.0/jars/classes.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="1c9f35e952b212c843f7bd2c7eec8e82ad95602e">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/com.google.android.gms-play-services-analytics-8.4.0_d9fd23c0d2073cc74918a3f11e02e3a9364c9e1b.jar" />
+    </item>
+    <item
+        jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-fitness/8.4.0/jars/classes.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="c54246475c1bb64ac6857d1320364bfbfeda2c46">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/com.google.android.gms-play-services-fitness-8.4.0_f8070d8633190386e29edba70d487af1a0ce7a59.jar" />
+    </item>
+    <item
+        jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/exploded-aar/com.android.support/support-v4/23.1.0/jars/classes.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="ddde541c289c8b816a8f8fd6c325d80788c522a6">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/com.android.support-support-v4-23.1.0_c90c03b3e73ab83f1eef88e4ae179659061fd578.jar" />
+    </item>
+    <item
+        jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-appinvite/8.4.0/jars/classes.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="9fe026fb4c7fce21bc5142f6e1bdf844f28061ac">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/com.google.android.gms-play-services-appinvite-8.4.0_dc484aec69daedf2153ad67c866564ee3a058d8b.jar" />
+    </item>
+    <item
+        jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/exploded-aar/com.google.android.gms/play-services-nearby/8.4.0/jars/classes.jar"
+        jumboMode="true"
+        revision="23.0.0"
+        sha1="9cad249cf62751a323d9af568caf12284b7d6062">
+        <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/com.google.android.gms-play-services-nearby-8.4.0_dac83e7a8f29039647198b38891561af70d86d2c.jar" />
+    </item>
+
+</items>

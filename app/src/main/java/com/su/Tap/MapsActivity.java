@@ -2,6 +2,7 @@ package com.su.Tap;
 
 import android.annotation.TargetApi;
 import android.net.Uri;
+import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 
 import android.Manifest;
@@ -19,6 +20,7 @@ import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.os.EnvironmentCompat;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -26,6 +28,7 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -52,6 +55,13 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.json.JSONException;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -63,28 +73,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
         GoogleMap.OnMarkerClickListener{
 
-    private Direction direction;
+    //prototype
+    TestLoadingData testLoadingData = null,testLoadingData2 = null;
+    private ImageView gimg,simg,simg2;
+    private TextView gtxt,stxt,stxt2;
+    //-------------------------------------
 
-    private Thread thread;
-    private Intent intentService;
+    private Direction direction;
 
     private AutoCompleteTextView startautoCompView = null, endautiComView = null;
     private LinearLayout mSearchBar;
     private Button mButtonDown;
-    private FloatingActionButton fabLocation, fabService;
+    private FloatingActionButton fabLocation, fabCurrentLocation,fabUpdata;
     private TextView txt;
 
     private LatLng start = null, end = null;
     private CharSequence place_startname = null, place_endname = null;
     private ArrayList<Marker> markers = new ArrayList<>();
     private ArrayList<LatLng> myLocaitonList = new ArrayList<>();
-    private Boolean startstop = false;
-    private Boolean isRunning = false;
     public int ButtonNumber = 0;
     //    private float DownX = 0;
     public GoogleMap mMap;
     private UiSettings mUis;
-    private LocationManager mLocationmgr;
 
     private Location mLocation = null;
 
@@ -129,7 +139,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
          * SDK is 23 up,So location access is error,has been access for user
          */
         if (!canAccessLocation() || !canAccessContacts())
-            requestPermissions(INITIAL_PERMS, INITIAL_REQUEST);
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+                requestPermissions(INITIAL_PERMS, INITIAL_REQUEST);
 
         Theme();
 
@@ -137,7 +149,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         mButtonDown = (Button) findViewById(R.id.down);
         mSearchBar = (LinearLayout) findViewById(R.id.searchBar);
-        mLocationmgr = (LocationManager) getSystemService(LOCATION_SERVICE);
+//        LocationManager mLocationmgr = (LocationManager) getSystemService(LOCATION_SERVICE);
 
         mRequestingLocationUpdates = false;
         mLastUpdateTime = "";
@@ -174,7 +186,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
-        txt = (TextView)findViewById(R.id.txt);
+//        txt = (TextView)findViewById(R.id.txt);
+
+        //prototype
+        gimg = (ImageView) findViewById(R.id.googleNavigationImg);
+        simg = (ImageView) findViewById(R.id.smartDriverImg);
+        simg2 = (ImageView) findViewById(R.id.smartDriverImg2);
+        gtxt = (TextView) findViewById(R.id.googleNavigationTxt);
+        stxt = (TextView) findViewById(R.id.smartDriverTxt);
+        stxt2 = (TextView) findViewById(R.id.smartDriverTxt2);
     }
 
     @Override
@@ -250,52 +270,57 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onDestroy();
         try {
             mGoogleApiClient.disconnect();
-            stopService(intentService);
         } catch (RuntimeException e) {
         }
-        isRunning = false;
-        startstop = false;
         Log.i(TAG_Activity, "onDestroy");
     }
 
+    boolean CLRunable = false;
     private void fabControl(final ArrayList<LatLng> output) {
-        fabService = (FloatingActionButton) findViewById(R.id.fab);
-        fabService.setOnClickListener(new View.OnClickListener() {
+        fabCurrentLocation = (FloatingActionButton) findViewById(R.id.fab);
+        fabCurrentLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mLocation != null) {
-                    if (!startstop) {
-                        toast("Service Start");
-                        fabService.setImageResource(R.drawable.ic_pause_dark);
-                        isRunning = true;
-                        startstop = true;
-                        thread = new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                while (isRunning) {
-                                    intentService = new Intent(MapsActivity.this, SQLService.class);
-                                    intentService.putExtra("Lat", mLocation.getLatitude());
-                                    intentService.putExtra("Lng", mLocation.getLatitude());
-                                    startService(intentService);
-                                    try {
-                                        Thread.sleep(1000);
-                                    } catch (InterruptedException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            }
-                        });
-                        thread.start();
-                    } else {
-                        toast("Service Stop");
-                        fabService.setImageResource(R.drawable.ic_play_dark);
-                        isRunning = false;
-                        startstop = false;
-                        intentService = new Intent(MapsActivity.this, SQLService.class);
-                        stopService(intentService);
-                    }
-                } else
-                    toast("Please check your GPS is opened");
+                if (!CLRunable) {
+                    toast("儲存GPS中...");
+                    CLRunable = true;
+                }else{
+                    toast("暫停儲存");
+                    CLRunable = false;
+                }
+//                if (mLocation != null) {
+//                    if (!startstop) {
+//                        toast("Service Start");
+//                        fabService.setImageResource(R.drawable.ic_pause_dark);
+//                        isRunning = true;
+//                        startstop = true;
+//                        thread = new Thread(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                while (isRunning) {
+//                                    intentService = new Intent(MapsActivity.this, SQLService.class);
+//                                    intentService.putExtra("Lat", mLocation.getLatitude());
+//                                    intentService.putExtra("Lng", mLocation.getLatitude());
+//                                    startService(intentService);
+//                                    try {
+//                                        Thread.sleep(1000);
+//                                    } catch (InterruptedException e) {
+//                                        e.printStackTrace();
+//                                    }
+//                                }
+//                            }
+//                        });
+//                        thread.start();
+//                    } else {
+//                        toast("Service Stop");
+//                        fabService.setImageResource(R.drawable.ic_play_dark);
+//                        isRunning = false;
+//                        startstop = false;
+//                        intentService = new Intent(MapsActivity.this, SQLService.class);
+//                        stopService(intentService);
+//                    }
+//                } else
+//                    toast("Please check your GPS is opened");
             }
         });
         fabLocation = (FloatingActionButton) findViewById(R.id.fabLocation);
@@ -310,6 +335,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             }
         });
+        /**
+        fabUpdata = (FloatingActionButton) findViewById(R.id.fabupdata);
+        fabUpdata.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //取得外部儲存媒體的目錄(這裡會是/sdcard)
+                String path = Environment.getExternalStorageDirectory().getPath();
+                //檔案路徑，記得要加斜線(這樣/sdcard/filename)
+                File file = new File(path + "/" + "123456.txt");
+            }
+        });
+         */
     }
 
     /**
@@ -343,6 +380,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mLatLng(), 18));
             else
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(mLatLng()));
+        }else {
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(25.033899, 121.564482),18));
         }
     }
 
@@ -397,6 +436,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mButtonDown.setTranslationX(-100);
 //        direction.parserTask.deletePolyLine();
         mMap.clear();
+        Percentclean();
     }
 
     private void SearchBarRideUp() {
@@ -501,42 +541,57 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 toast("Your locate isn't found,please check GPS is open");
             }
             if (endtmp.equals(""))
-                toast(String.valueOf(R.string.endlocationnull));
+                toast("Destination is null,Pleas check");
             else {
-                if (!place_endname.equals(endtmp))
-                    end = getLatLongFromAddress(endtmp);
+                if (place_endname != null)
+                    if (!place_endname.equals(endtmp))
+                        end = getLatLongFromAddress(endtmp);
                 SearchBarRideUp();
                 direction = new Direction(start, end, mMap);
-                try {
-                    direction.execute().get();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                }
+                direction.execute();
             }
         } else {
-            if (!place_startname.equals(starttmp))
-                start = getLatLongFromAddress(starttmp);
-            if (!place_endname.equals(endtmp))
-                end = getLatLongFromAddress(endtmp);
+            if (place_startname != null) {
+                if (!place_startname.equals(starttmp))
+                    start = getLatLongFromAddress(starttmp);
+            }else start = getLatLongFromAddress(starttmp);
+            if (place_endname != null) {
+                if (!place_endname.equals(endtmp))
+                    end = getLatLongFromAddress(endtmp);
+            }else end = getLatLongFromAddress(endtmp);
             SearchBarRideUp();
             direction = new Direction(start, end, mMap);
-            try {
-                direction.execute().get();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
+            direction.execute();
         }
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(start, 18));
+
+        //Updata for prototype
+//        if (start.equals("淡江大學") && end.equals("淡水捷運站")) {
+            testLoadingData = new TestLoadingData(mMap,1);
+//            testLoadingData.execute();
+            testLoadingData.execute();
+            testLoadingData2 = new TestLoadingData(mMap,2);
+            testLoadingData2.execute();
+            ShowPercent();
+//        }
     }
 
     private void ShowPercent() {
-
+        gtxt.setText("Google Map(37.3%)");
+        gimg.setBackgroundColor(Color.BLUE);
+        stxt.setText("Smart Driver(49.5%)");
+        simg.setBackgroundColor(Color.RED);
+        stxt2.setText("Smart Driver(13.2%)");
+        simg2.setBackgroundColor(Color.GRAY);
     }
-
+    private void Percentclean(){
+        gtxt.setText("");
+        gimg.setBackgroundColor(Color.argb(0,255,255,255));
+        stxt.setText("");
+        simg.setBackgroundColor(Color.argb(0,255,255,255));
+        stxt2.setText("");
+        simg2.setBackgroundColor(Color.argb(0,255,255,255));
+    }
     /**
      * getLatLongFromAddress
      */
@@ -795,8 +850,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return (hasPermission(Manifest.permission.ACCESS_FINE_LOCATION));
     }
 
-    @TargetApi(Build.VERSION_CODES.M)
     private boolean hasPermission(String perm) {
-        return (PackageManager.PERMISSION_GRANTED == checkSelfPermission(perm));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            return (PackageManager.PERMISSION_GRANTED == checkSelfPermission(perm));
+        return false;
     }
 }

@@ -113,7 +113,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/StatusView"
-            android:layout_alignParentEnd="true">
+            android:layout_marginTop="80dp">
 
             <LinearLayout
                 android:orientation="horizontal"
@@ -154,6 +154,27 @@
                     android:layout_width="20dp"
                     android:layout_height="20dp"
                     android:id="@+id/smartDriverImg"
+                    android:layout_marginRight="15dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="right">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:textSize="16dp"
+                    android:textStyle="bold"
+                    android:id="@+id/smartDriverTxt2" />
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:id="@+id/smartDriverImg2"
                     android:layout_marginRight="15dp" />
             </LinearLayout>
 
@@ -213,14 +234,14 @@
             android:src="@drawable/abc_btn_radio_to_on_mtrl_015"
             android:id="@+id/fabLocation"/>
 
-        <android.support.design.widget.FloatingActionButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/fabTest"
-            android:layout_alignTop="@+id/fabLocation"
-            android:layout_toStartOf="@+id/fabLocation"
-            android:layout_marginEnd="16dp"
-            android:src="@mipmap/ic_record" />
+        <!--<android.support.design.widget.FloatingActionButton-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:id="@+id/fabupdata"-->
+            <!--android:layout_alignTop="@+id/fabLocation"-->
+            <!--android:layout_toStartOf="@+id/fabLocation"-->
+            <!--android:layout_marginEnd="16dp"-->
+            <!--android:src="@android:drawable/ic_menu_upload" />-->
 
     </RelativeLayout>
 

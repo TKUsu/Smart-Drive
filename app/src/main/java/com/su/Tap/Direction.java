@@ -115,7 +115,7 @@ public class Direction extends AsyncTask<Void, Void, String> {
                 // Drawing polyline in the Google Map for the i-th route
                 dPolyline = dMap.addPolyline(lineOptions);
             }catch (NullPointerException e){
-                Log.e(MapsActivity.class.getName(),e.getMessage());
+
             }
         }
         public void deletePolyLine(){

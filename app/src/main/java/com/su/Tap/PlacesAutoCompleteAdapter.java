@@ -132,7 +132,13 @@ class PlacesAutoCompleteAdapter extends ArrayAdapter<String> implements Filterab
             // Extract the Place descriptions from the results
             resultList = new ArrayList<String>(predsJsonArray.length());
             for (int i = 0; i < predsJsonArray.length(); i++) {
-                resultList.add(predsJsonArray.getJSONObject(i).getString("description"));
+                String value = "";
+                JSONArray termsArray = predsJsonArray.getJSONObject(i).getJSONArray("terms");
+                for (int j = 0;j < termsArray.length()-1;j++) {
+                    String str = termsArray.getJSONObject(j).getString("value");
+                    value += str;
+                }
+                resultList.add(value);
             }
         } catch (JSONException e) {
             Log.e(TAG, "Cannot process JSON results", e);

@@ -2,6 +2,7 @@ package com.su.Tap;
 
 import android.annotation.TargetApi;
 import android.net.Uri;
+import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 
 import android.Manifest;
@@ -19,6 +20,7 @@ import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.os.EnvironmentCompat;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -26,6 +28,7 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -51,9 +54,14 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
 
+import org.json.JSONException;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -63,38 +71,27 @@ import java.util.concurrent.ExecutionException;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
-        GoogleMap.OnMarkerClickListener, AsyncResponse {
+        GoogleMap.OnMarkerClickListener{
+
+    //prototype
+    private ImageView gimg,simg,simg2;
+    private TextView gtxt,stxt,stxt2;
+    //-------------------------------------
 
     private Direction direction;
 
-    private Thread thread;
-    private Intent intentService;
-
-    private AutoCompleteTextView startautoCompView = null, endautiComView = null;
-    private LinearLayout mSearchBar;
-    private Button mButtonDown;
-    private FloatingActionButton fabLocation, fabService, fabTest,fabTest2;
+    private AutoCompleteTextView startautoCompView = null, endautiComView = null,endautiComViewSingle = null;
+    private View mSearchBar,mSearchBarSingle,mClearMap;
+    private FloatingActionButton fabLocation, fabCurrentLocation,fabUpdata;
     private TextView txt;
 
     private LatLng start = null, end = null;
     private CharSequence place_startname = null, place_endname = null;
     private ArrayList<Marker> markers = new ArrayList<>();
     private ArrayList<LatLng> myLocaitonList = new ArrayList<>();
-    public SQLiteHelper sqLiteHelper;
-    private Polyline polyline = null;
-    private PolylineOptions lineOptions;
-    int dcolor = R.color.smartDriverColor2;
-    int lineWidth = 10;
-
-    private Boolean loactionchangejudge = false;
-    private Boolean myLocationDrawJudgement = false;
-    private Boolean startstop = false;
-    private Boolean isRunning = false;
     public int ButtonNumber = 0;
-    //    private float DownX = 0;
     public GoogleMap mMap;
     private UiSettings mUis;
-    private LocationManager mLocationmgr;
 
     private Location mLocation = null;
 
@@ -139,15 +136,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
          * SDK is 23 up,So location access is error,has been access for user
          */
         if (!canAccessLocation() || !canAccessContacts())
-            requestPermissions(INITIAL_PERMS, INITIAL_REQUEST);
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+                requestPermissions(INITIAL_PERMS, INITIAL_REQUEST);
 
         Theme();
 
         fabControl(myLocaitonList);
 
-        mButtonDown = (Button) findViewById(R.id.down);
-        mSearchBar = (LinearLayout) findViewById(R.id.searchBar);
-        mLocationmgr = (LocationManager) getSystemService(LOCATION_SERVICE);
+        mSearchBar = findViewById(R.id.searchBar);
+        mSearchBarSingle = findViewById(R.id.searchBarSingle);
+        mClearMap = findViewById(R.id.clearMap);
 
         mRequestingLocationUpdates = false;
         mLastUpdateTime = "";
@@ -179,12 +178,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
+        endautiComViewSingle = (AutoCompleteTextView) findViewById(R.id.endAutoComViewSingle);
+        endautiComViewSingle.setAdapter(new PlacesAutoCompleteAdapter(this, R.layout.autocomplete_list_item));
+        endautiComViewSingle.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String s = (String) parent.getItemAtPosition(position);
+                end = getLatLongFromAddress(s);
+                mMap.animateCamera(CameraUpdateFactory.newLatLng(end));
+                markers.add(setMapMarker(1, s, null, end, null, null));
+            }
+        });
+
+
         //使用該LOG可以知道當下是使用哪個執行緒,1為主執行緒
         Log.e("thread", "Map id=" + String.valueOf(Thread.currentThread().getId()));
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
-        txt = (TextView)findViewById(R.id.txt);
+//        txt = (TextView)findViewById(R.id.txt);
+
+        //prototype
+        gimg = (ImageView) findViewById(R.id.googleNavigationImg);
+        simg = (ImageView) findViewById(R.id.smartDriverImg);
+        simg2 = (ImageView) findViewById(R.id.smartDriverImg2);
+        gtxt = (TextView) findViewById(R.id.googleNavigationTxt);
+        stxt = (TextView) findViewById(R.id.smartDriverTxt);
+        stxt2 = (TextView) findViewById(R.id.smartDriverTxt2);
     }
 
     @Override
@@ -249,8 +269,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Uri.parse("android-app://com.su.Tap/http/host/path")
         );
         AppIndex.AppIndexApi.end(client, viewAction);
-//        if (!isRunning)
-//            mGoogleApiClient.disconnect();
         Log.i(TAG_Activity, "onStop");
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -262,146 +280,79 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onDestroy();
         try {
             mGoogleApiClient.disconnect();
-            stopService(intentService);
         } catch (RuntimeException e) {
         }
-        isRunning = false;
-        startstop = false;
         Log.i(TAG_Activity, "onDestroy");
     }
-    Boolean tempjudge = false;
-    int temp = 0;
-    ArrayList<LatLng> arrayListtemp = new ArrayList<>();
-    private void fabControl(final ArrayList<LatLng> output) {
-        fabService = (FloatingActionButton) findViewById(R.id.fab);
-        fabService.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mLocation != null) {
-                    if (!startstop) {
-                        toast("Service Start");
-                        fabService.setImageResource(R.drawable.ic_pause_dark);
-                        isRunning = true;
-                        startstop = true;
-                        thread = new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-//                                String s = "("+mLocation.getLatitude()+"),("+mLocation.getLatitude()+")";
-//                                txt.setText(s);
-                                while (isRunning) {
-                                    intentService = new Intent(MapsActivity.this, SQLService.class);
-                                    intentService.putExtra("Lat", mLocation.getLatitude());
-                                    intentService.putExtra("Lng", mLocation.getLatitude());
-                                    startService(intentService);
-                                    try {
-                                        Thread.sleep(1000);
-                                    } catch (InterruptedException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            }
-                        });
-                        thread.start();
-                    } else {
-                        toast("Service Stop");
-                        fabService.setImageResource(R.drawable.ic_play_dark);
-                        isRunning = false;
-                        startstop = false;
-                        intentService = new Intent(MapsActivity.this, SQLService.class);
-                        stopService(intentService);
-                    }
-                } else
-                    toast("Please check your GPS is opened");
-            }
-        });
-        fabTest = (FloatingActionButton) findViewById(R.id.fabTest);
-        fabTest.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
 
-//                Log.d("TestRoad",output.toString());
-//                for (int i = 0;i < output.size();i++) {
-//                    sqLiteHelper.sql("insert", output.get(i));
-//                    Log.d("TestRoad_",output.get(i).toString());
-//                }
-                if (!myLocationDrawJudgement) {
-                    lineOptions = new PolylineOptions();
-                    Log.d("SQL", "Drawing now~~~");
-                    //Adding all the points in the route to LineOptions
-                    lineOptions.addAll(output);
-                    lineOptions.width(lineWidth);  //導航路徑寬度
-                    lineOptions.color(dcolor); //導航路徑顏色
-                    polyline = mMap.addPolyline(lineOptions);
-                    myLocationDrawJudgement = true;
-                }else if(myLocationDrawJudgement){
-                    polyline.remove();
-                    myLocationDrawJudgement = false;
+    boolean CLRunable = false;
+    private void fabControl(final ArrayList<LatLng> output) {
+        fabCurrentLocation = (FloatingActionButton) findViewById(R.id.fab);
+        fabCurrentLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!CLRunable) {
+                    toast("儲存GPS中...");
+                    CLRunable = true;
+                }else{
+                    toast("暫停儲存");
+                    CLRunable = false;
                 }
-//                temp++;
-//                toast("change");
-//                Log.d("SQL", String.valueOf(temp));
+//                if (mLocation != null) {
+//                    if (!startstop) {
+//                        toast("Service Start");
+//                        fabService.setImageResource(R.drawable.ic_pause_dark);
+//                        isRunning = true;
+//                        startstop = true;
+//                        thread = new Thread(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                while (isRunning) {
+//                                    intentService = new Intent(MapsActivity.this, SQLService.class);
+//                                    intentService.putExtra("Lat", mLocation.getLatitude());
+//                                    intentService.putExtra("Lng", mLocation.getLatitude());
+//                                    startService(intentService);
+//                                    try {
+//                                        Thread.sleep(1000);
+//                                    } catch (InterruptedException e) {
+//                                        e.printStackTrace();
+//                                    }
+//                                }
+//                            }
+//                        });
+//                        thread.start();
+//                    } else {
+//                        toast("Service Stop");
+//                        fabService.setImageResource(R.drawable.ic_play_dark);
+//                        isRunning = false;
+//                        startstop = false;
+//                        intentService = new Intent(MapsActivity.this, SQLService.class);
+//                        stopService(intentService);
+//                    }
+//                } else
+//                    toast("Please check your GPS is opened");
             }
         });
-//        fabTest2 = (FloatingActionButton)findViewById(R.id.fabTest2);
-//        fabTest2.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                for (int i = 0;i < output.size();i++) {
-//                    arrayListtemp.add(output.get(i));
-//                }
-//            }
-//        });
         fabLocation = (FloatingActionButton) findViewById(R.id.fabLocation);
         fabLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                fabTest2.hide();
-//                fabTest.hide();
-
                 try {
                     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mLatLng(), 18));
                 } catch (NullPointerException e) {
                     toast("Please check your GPS is opened");
                     Log.e("My Location", e.toString());
                 }
-//                if (temp == 0) {
-
-//                    sqLiteHelper = new SQLiteHelper(MapsActivity.this, "roadDB");
-//                    sqLiteHelper.setData(sqLiteHelper.getWritableDatabase());
-////                    ArrayList<LatLng> arrayList = new ArrayList<LatLng>();
-//                    for (int i = 0;i < output.size();i++) {
-//                        sqLiteHelper.sql("insert",output.get(i));
-//                        Log.d("TestRoad_",output.get(i).toString());
-////                        arrayListtemp.add(output.get(i));
-//                    }
-
-//                    lineOptions = new PolylineOptions();
-//                    Log.d("SQL", "Drawing now~~~");
-//                     Adding all the points in the route to LineOptions
-//                    lineOptions.addAll(arrayList);
-//                    lineOptions.width(lineWidth);  //導航路徑寬度
-//                    lineOptions.color(dcolor); //導航路徑顏色
-//                    polyline = mMap.addPolyline(lineOptions);
-//                    myLocationDrawJudgement = true;
-//                }else if(temp == 1){
-//                    sqLiteHelper = new SQLiteHelper(MapsActivity.this, "roadDB2");
-//                    sqLiteHelper.setData(sqLiteHelper.getWritableDatabase());
-////                    ArrayList<LatLng> arrayList = new ArrayList<LatLng>();
-//                    for (int i = 0;i < output.size();i++) {
-//                        sqLiteHelper.sql("insert", output.get(i));
-//                        Log.d("TestRoad_",output.get(i).toString());
-//                    }
-//                    lineOptions = new PolylineOptions();
-//                    Log.d("SQL", "Drawing now~~~");
-                    // Adding all the points in the route to LineOptions
-//                    lineOptions.addAll(arrayList);
-//                    lineOptions.width(lineWidth);  //導航路徑寬度
-//                    lineOptions.color(dcolor); //導航路徑顏色
-//                    polyline = mMap.addPolyline(lineOptions);
-//                    myLocationDrawJudgement = true;
-//                }
             }
         });
+        /**
+        fabUpdata = (FloatingActionButton) findViewById(R.id.fabupdata);
+        fabUpdata.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+            }
+        });
+         */
     }
 
     /**
@@ -435,6 +386,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mLatLng(), 18));
             else
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(mLatLng()));
+        }else {
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(25.033899, 121.564482),18));
         }
     }
 
@@ -470,63 +423,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return marker;
     }
 
-    private int PRange, SRange, DRange;
-
-    public void OnDownButtonClick(View view) {
-        /**
-         *      1 :Map padding ride up 0 to 200
-         *      2 :Search bar ride up -200 to 0
-         *      3 :Button down ride down -10 to -100
-         */
-        if (view.getId() == R.id.down) {
-            PRange = view.getHeight();
-            SRange = view.getHeight();
-            DRange = view.getHeight();
-        }
-        Log.e("Test:", "PRange = " + String.valueOf(PRange) +
-                "SRange = " + String.valueOf(SRange) + "DRange = " + String.valueOf(DRange));
-        myAnimation(0, 200, -200, 200, -10, -90);
-        mButtonDown.setTranslationX(-100);
-//        direction.parserTask.deletePolyLine();
-        mMap.clear();
-    }
-
-    private void SearchBarRideUp() {
-        /**
-         *      1 :Map padding ride up 200 to 0
-         *      2 :Search bar ride up 0 to -200
-         *      3 :Button down ride down -100 to -10
-         *      myAnimation((1,2,3).translation,(1,2,3).start point)
-         */
-        myAnimation(200, -200, 0, -200, -100, 90);
-        mButtonDown.setTranslationX(mSearchBar.getWidth() / 2 - 20);
-    }
-
-    private void myAnimation(int Pstart, int PRange, int Sstart, int SRange, int Dstart, int DRange) {
-        PRange = PRange / 10;
-        SRange = SRange / 10;
-        DRange = DRange / 10;
-        int i = 0;
-        Handler handler1 = new Handler();
-        while (i < 10) {
-            Pstart += PRange;
-            Sstart += SRange;
-            Dstart += DRange;
-            final int finalPtemp = Pstart;
-            final int finalStemp = Sstart;
-            final int finalDtemp = Dstart;
-            handler1.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-//                    mMap.setPadding(0, finalPtemp, 0, 0);
-                    mSearchBar.setTranslationY(finalStemp);
-                    mButtonDown.setTranslationY(finalDtemp);
-                }
-            }, 25 * i);
-            i++;
-        }
-    }
-
     /**
      * =============================================================================================
      * Places Picker
@@ -536,8 +432,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onSearch(View view) {
         if (view.getId() == R.id.placeB1)
             ButtonNumber = 1;
-        else if (view.getId() == R.id.placeB2)
-            ButtonNumber = 2;
         PlacePicker.IntentBuilder intentBuilder = new PlacePicker.IntentBuilder();
         Intent intent;
         try {
@@ -564,80 +458,128 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 start = latlng;
                 this.place_startname = name;
                 markers.add(setMapMarker(0, name, address, start, number, Type));
-            } else if (ButtonNumber == 2) {
+            } else{
                 endautiComView.setText(name);
+                endautiComViewSingle.setText(name);
                 end = latlng;
                 this.place_endname = name;
                 markers.add(setMapMarker(1, name, address, end, number, Type));
             }
+            showClearMap();
         }
     }
 
     /**
      * Navigation    判斷是否為空值、直接輸入文字或是選取地點
      */
-    int judgenavigation = 0;
     public void onNavigation(View view) {
-        String starttmp, endtmp;
-        String temp = null;
-        starttmp = startautoCompView.getText().toString();
-        endtmp = endautiComView.getText().toString();
-        if (!starttmp.equals("")) {
-            startautoCompView.setHint("Start Location");
-            startautoCompView.setHintTextColor(0x454545);
-        }
-        if (starttmp.equals("")) {
-            startautoCompView.setHint("Your Location...");
-            startautoCompView.setHintTextColor(Color.BLACK);
-            try {
-                start = mLatLng();
-            } catch (NullPointerException e) {
-                toast("Your locate isn't found,please check GPS is open");
-            }
-            if (endtmp.equals(""))
-                toast(String.valueOf(R.string.endlocationnull));
-            else {
-                if (!place_endname.equals(endtmp))
-                    end = getLatLongFromAddress(endtmp);
-                SearchBarRideUp();
-                direction = new Direction(start, end, mMap);
-                direction.delegate = this;
-                try {
-                    direction.execute().get();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
+        String starttmp = startautoCompView.getText().toString();
+        String endtmp = endautiComView.getText().toString();
+        String endtmpSingle = endautiComViewSingle.getText().toString();
+        Log.d("Test",String.valueOf(view.getId()));
+        switch (view.getId()){
+            case R.id.NavigationB:
+                if (!starttmp.equals("")) {
+                    startautoCompView.setHint("Start Location");
+                    startautoCompView.setHintTextColor(0x454545);
                 }
-            }
-        } else {
-            if (!place_startname.equals(starttmp))
-                start = getLatLongFromAddress(starttmp);
-            if (!place_endname.equals(endtmp))
-                end = getLatLongFromAddress(endtmp);
-            SearchBarRideUp();
-            direction = new Direction(start, end, mMap);
-            direction.delegate = this;
-            try {
-                direction.execute().get();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
+                if (starttmp.equals("")) {
+                    startautoCompView.setHint("Your Location...");
+                    startautoCompView.setHintTextColor(Color.BLACK);
+                    try {
+                        start = mLatLng();
+                    } catch (NullPointerException e) {
+                        toast("Your origin or destination isn't found!!");
+                    }
+                    if (endtmp.equals(""))
+                        toast("Destination is null,Pleas check");
+                    else {
+                        if (place_endname != null)
+                            if (!place_endname.equals(endtmp))
+                                end = getLatLongFromAddress(endtmp);
+                        direction = new Direction(start, end, mMap);
+                        direction.execute();
+                        showClearMap();
+                    }
+                } else {
+                    if (place_startname != null) {
+                        if (!place_startname.equals(starttmp))
+                            start = getLatLongFromAddress(starttmp);
+                    }else start = getLatLongFromAddress(starttmp);
+                    if (place_endname != null) {
+                        if (!place_endname.equals(endtmp))
+                            end = getLatLongFromAddress(endtmp);
+                    }else end = getLatLongFromAddress(endtmp);
+                    direction = new Direction(start, end, mMap);
+                    direction.execute();
+                    showClearMap();
+                }
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(start, 18));
+                break;
+            case R.id.NavigationSingle:
+                try {
+                    startautoCompView.setHint("Your Location...");
+                    startautoCompView.setHintTextColor(Color.BLACK);
+                        start = mLatLng();
+
+                    if (place_endname != null) {
+                        if (!place_endname.equals(endtmpSingle))
+                            end = getLatLongFromAddress(endtmpSingle);
+                    }else end = getLatLongFromAddress(endtmpSingle);
+                    direction = new Direction(start, end, mMap);
+                    direction.execute();
+                    endautiComView.setText(endtmpSingle);
+                    mSearchBarSingle.setVisibility(view.GONE);
+                    mSearchBar.setVisibility(view.VISIBLE);
+                    showClearMap();
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(start, 18));
+                } catch (NullPointerException e) {
+                    toast("Your origin or destination isn't found!!");
+                }break;
         }
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(start, 18));
-        if (judgenavigation == 0) {
-            draw(1);
-//            draw(2);
-            judgenavigation++;
+
+
+        //Updata for prototype
+        if (starttmp.contains("淡水捷運站") && endtmp.contains("淡江大學")) {
+            TestLoadingData testLoadingData = new TestLoadingData(mMap,1);
+            testLoadingData.execute();
+            TestLoadingData testLoadingData2 = new TestLoadingData(mMap,2);
+            testLoadingData2.execute();
+            TestLoadingData testLoadingData3 = new TestLoadingData(mMap,3);
+            testLoadingData3.execute();
+            showClearMap();
+            ShowPercent();
+        }else {
+            Percentclean();
         }
+    }
+
+    private void showClearMap(){
+        mClearMap.setVisibility(View.VISIBLE);
+    }
+
+    private void clearMap(View view){
+        mClearMap.setVisibility(View.INVISIBLE);
+        Percentclean();
+        mMap.clear();
     }
 
     private void ShowPercent() {
-
+        gtxt.setText("Google Map(37.3%)");
+        gimg.setBackgroundColor(Color.BLUE);
+        stxt.setText("Smart Driver(49.5%)");
+        simg.setBackgroundColor(Color.RED);
+        stxt2.setText("Smart Driver(13.2%)");
+        simg2.setBackgroundColor(Color.GRAY);
     }
-
+    private void Percentclean(){
+        gtxt.setText("");
+        gimg.setBackgroundColor(Color.argb(0,255,255,255));
+        stxt.setText("");
+        simg.setBackgroundColor(Color.argb(0,255,255,255));
+        stxt2.setText("");
+        simg2.setBackgroundColor(Color.argb(0,255,255,255));
+    }
     /**
      * getLatLongFromAddress
      */
@@ -862,20 +804,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return 0;
     }
 
-    private int getStatusHeight(Context context, int type) {
-        Resources resources = context.getResources();
-        int resourceId = resources.getIdentifier("status_bar_height", "dimen", "android");
-        if (resourceId > 0) {
-            if (type == 0)
-                return resources.getDimensionPixelSize(resourceId)
-                        + mSearchBar.getHeight();
-            else if (type == 1)
-                return resources.getDimensionPixelSize(resourceId)
-                        + mSearchBar.getHeight();
-        }
-        return 0;
-    }
-
     public void toast(String tmp) {
         try {
             Toast.makeText(MapsActivity.this, tmp, Toast.LENGTH_LONG).show();
@@ -896,55 +824,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return (hasPermission(Manifest.permission.ACCESS_FINE_LOCATION));
     }
 
-    @TargetApi(Build.VERSION_CODES.M)
     private boolean hasPermission(String perm) {
-        return (PackageManager.PERMISSION_GRANTED == checkSelfPermission(perm));
-    }
-
-    @Override
-    public void processFinish(ArrayList<LatLng> output) {
-        Log.d("TestRoad", "Direction list2:" + output.toString());
-        this.myLocaitonList = output;
-        fabControl(output);
-//                try {
-//                    Log.d("SQL", "MapActivity list:" + myLocaitonList.toString());
-//                } catch (NullPointerException e) {
-//                    Log.d("SQL", "MapActivity list is NULL");
-//                }
-    }
-
-    private void draw(int i){
-        switch (i) {
-            case 1:
-                sqLiteHelper = new SQLiteHelper(MapsActivity.this, "roadDB");
-                break;
-//            case 2:
-////                sqLiteHelper = new SQLiteHelper(MapsActivity.this, "roadDB2");
-//                PolylineOptions lineOptions = new PolylineOptions();
-//                Log.d("SQL", "Drawing now~~~");
-//                // Adding all the points in the route to LineOptions
-//                lineOptions.addAll(arrayListtemp);
-//                lineOptions.width(lineWidth);  //導航路徑寬度
-//                lineOptions.color(dcolor); //導航路徑顏色
-//                polyline = mMap.addPolyline(lineOptions);
-//                break;
-//            case 3:
-//                sqLiteHelper = new SQLiteHelper(MapsActivity.this, "roadDB3");
-//                break;
-//            case 4:
-//                sqLiteHelper = new SQLiteHelper(MapsActivity.this, "roadDB4");
-//                break;
-        }
-        sqLiteHelper.setData(sqLiteHelper.getWritableDatabase());
-        ArrayList<LatLng> arrayList = new ArrayList<LatLng>();
-        arrayList = sqLiteHelper.sql("search", null);
-        lineOptions = new PolylineOptions();
-        Log.d("SQL", "Drawing now~~~");
-        // Adding all the points in the route to LineOptions
-        lineOptions.addAll(arrayList);
-        lineOptions.width(lineWidth);  //導航路徑寬度
-        lineOptions.color(dcolor); //導航路徑顏色
-        polyline = mMap.addPolyline(lineOptions);
-        myLocationDrawJudgement = true;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            return (PackageManager.PERMISSION_GRANTED == checkSelfPermission(perm));
+        return false;
     }
 }

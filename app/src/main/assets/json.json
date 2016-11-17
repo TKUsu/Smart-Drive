@@ -1,0 +1,27 @@
+{
+   "status" : "OK",
+   "routes" : [
+      {
+         "location" : [
+            {
+            "end_address" : "251台灣新北市淡水區中正路捷運淡水站",
+            "end_location" : {
+               "lat" : 25.1676576,
+               "lng" : 121.4454147
+               },
+            "start_address" : "251台灣新北市淡水區淡江大學",
+            "start_location" : {
+               "lat" : 25.1756039,
+               "lng" : 121.4568848
+               }
+            }],
+         "steps" : [
+            {
+            "polyline_point" : "obtxCo`idVhAq@|@i@j@[ZQTOzCgBnAu@|A_AvBmAdC{Ah@[NIv@c@v@e@t@c@h@Uj@W^M`@KXEv@E^Aj@A\\?V@`@D\\Df@JZJ`@Jl@Vf@Z^V~@v@p@n@|BbCdBhBlArAhAlATRd@f@h@l@l@j@x@p@\\RVLl@VTF\\Ff@Fn@Bt@Bv@?",
+            "polyline_point" : "_mqxCe|hdVDr@FtA?Z@f@ATAV?J@D@HBJNX\\d@j@t@XZFFHBD?H?NAl@Ib@ED?H@D@FDFDFDDF@BBF@D?D?B?BADABEBKJCDCBABCFCDA@?@?@?@?B",
+            "polyline_point" : "'google map encode point'"
+            }
+         ]
+      }
+   ]
+}

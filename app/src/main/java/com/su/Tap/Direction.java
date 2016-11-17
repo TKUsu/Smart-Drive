@@ -18,12 +18,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-public class Direction extends AsyncTask<Void, Void, String> implements AsyncResponse{
+public class Direction extends AsyncTask<Void, Void, String> {
     // Downloading data in non-ui thread
 
     DirectionAPI DctAPI = new DirectionAPI();
     public ParserTask parserTask = new ParserTask();
-    public AsyncResponse delegate = null;
 
     private LatLng start, end;
     private GoogleMap dMap;
@@ -32,7 +31,6 @@ public class Direction extends AsyncTask<Void, Void, String> implements AsyncRes
     public static int lineWidth = 10;
 
     private PolylineOptions lineOptions;
-    private ArrayList<LatLng> arrayList = new ArrayList();
 
     public Direction(LatLng start, LatLng end, GoogleMap mMap) {
         this.start = start;
@@ -61,7 +59,6 @@ public class Direction extends AsyncTask<Void, Void, String> implements AsyncRes
         // Invokes the thread for parsing the JSON data
         try {
             parserTask.execute(result).get();
-            parserTask.pdelegate = this;
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -69,19 +66,11 @@ public class Direction extends AsyncTask<Void, Void, String> implements AsyncRes
         }
     }
 
-    @Override
-    public void processFinish(ArrayList<LatLng> output) {
-        this.arrayList = output;
-        delegate.processFinish(arrayList);
-        Log.d("TestRoad","Direction list1:"+arrayList.toString());
-    }
     /** 解析JSON格式 **/
     public class ParserTask extends
             AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
         Polyline dPolyline = null;
         ArrayList<LatLng> points = null;
-
-        public AsyncResponse pdelegate = null;
 
         // Parsing the data in non-ui thread
         @Override
@@ -125,9 +114,8 @@ public class Direction extends AsyncTask<Void, Void, String> implements AsyncRes
                 }
                 // Drawing polyline in the Google Map for the i-th route
                 dPolyline = dMap.addPolyline(lineOptions);
-                pdelegate.processFinish(points);
             }catch (NullPointerException e){
-                Log.e(MapsActivity.class.getName(),e.getMessage());
+
             }
         }
         public void deletePolyLine(){

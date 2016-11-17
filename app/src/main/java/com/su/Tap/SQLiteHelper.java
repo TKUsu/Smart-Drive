@@ -40,22 +40,6 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                 " _ID INTEGER PRIMARY KEY AUTOINCREMENT," +
                 " lat DOUBLE NOT NULL," +
                 " lng DOUBLE NOT NULL)");
-        db.execSQL("CREATE TABLE roadDB2 (" +
-                " _ID INTEGER PRIMARY KEY AUTOINCREMENT," +
-                " lat DOUBLE NOT NULL," +
-                " lng DOUBLE NOT NULL)");
-        db.execSQL("CREATE TABLE roadDB3 (" +
-                " _ID INTEGER PRIMARY KEY AUTOINCREMENT," +
-                " lat DOUBLE NOT NULL," +
-                " lng DOUBLE NOT NULL)");
-        db.execSQL("CREATE TABLE roadDB4 (" +
-                " _ID INTEGER PRIMARY KEY AUTOINCREMENT," +
-                " lat DOUBLE NOT NULL," +
-                " lng DOUBLE NOT NULL)");
-        db.execSQL("CREATE TABLE roadDB5 (" +
-                " _ID INTEGER PRIMARY KEY AUTOINCREMENT," +
-                " lat DOUBLE NOT NULL," +
-                " lng DOUBLE NOT NULL)");
     }
 
     @Override
@@ -73,14 +57,14 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         ContentValues cv;
 //        int count, id;
         switch (temp) {
-//            case "insert":
-//                long idtemp;
-//                cv = new ContentValues();
-//                cv.put("lat", latLng.latitude);
-//                cv.put("lng", latLng.longitude);
-//                idtemp = db.insert(DATABASE_NAME, null, cv);
-//                Log.e(TAG,"新增記錄成功"+ DATABASE_NAME + "  " + idtemp + ":" + latLng.toString());
-//                break;
+            case "insert":
+                long idtemp;
+                cv = new ContentValues();
+                cv.put("lat", latLng.latitude);
+                cv.put("lng", latLng.longitude);
+                idtemp = db.insert(DATABASE_NAME, null, cv);
+                Log.e(TAG,"新增記錄成功"+ DATABASE_NAME + "  " + idtemp + ":" + latLng.toString());
+                break;
             case "search":
                 SqlQuery("SELECT * FROM " + DATABASE_NAME);
                 return list;
@@ -93,20 +77,6 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                 Log.e(TAG,"新增記錄成功" + temptxt + ":" + latLng.toString());
                 SqlQuery("SELECT * FROM " + DATABASE_NAME);
                 break;
-//                case "update":
-//                    id = Integer.parseInt(tid.getText().toString());
-//                    cv = new ContentValues();
-//                    cv.put("score", Double.parseDouble(score.getText().toString()));
-//                    count = db.update("road", cv, "_id=" + id, null);
-//                    output.setText("更新記錄成功" + count);
-//                    break;
-
-//                case "delete":
-//                    id = Integer.parseInt(tid.getText().toString());
-//                    count = db.delete("road" +
-//                            "", "_id=" + id, null);
-//                    output.setText("刪除記錄成功" + count);
-//                    break;
         }
         return null;
     }
@@ -134,24 +104,15 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         setlist();
         return list;
     }
-//    public int getID(){
-//        if (i != 0)
-//            return i;
-//        else return 0;
-//    }
     public ArrayList<LatLng> setlist() {
         int i = 1;
         LatLng latLng;
         do {
             latLng = hashMap.get(i);
-//            Log.d(TAG, "i:" + i + " LatLng = " + latLng.toString());
             list.add(latLng);
             i++;
         } while (i != hashMap.size()+1);
         Log.d(TAG,"set list = " + list.toString());
         return list;
     }
-//    public ArrayList<LatLng> getlsit(){
-//        return list;
-//    }
 }

@@ -26,7 +26,7 @@
         jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/incremental-classes/debug/instant-run-bootstrap.jar"
         jumboMode="true"
         revision="23.0.0"
-        sha1="e46e6aa1a24a54b7b5d481c97d9762465489bde5">
+        sha1="1520aea0ba1a8f67fc955a81c7dddfae5fa31c70">
         <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/instant-run-bootstrap_95e89803d1febd60ca049ccececf30fd2c08319c.jar" />
     </item>
     <item
@@ -131,7 +131,7 @@
         jar="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/incremental-runtime-classes/debug/instant-run.jar"
         jumboMode="true"
         revision="23.0.0"
-        sha1="b7370f923269ee2344782429e5933872e0c598e0">
+        sha1="5020930caf3c58ac268a6ea9eda9eec66bd263cd">
         <dex dex="/Users/sujustin/Git/Android/Special-Topics-Lab/app/build/intermediates/pre-dexed/debug/instant-run_1cde6903bb5cc27483511baa2dd1f6c4ebd03a84.jar" />
     </item>
     <item

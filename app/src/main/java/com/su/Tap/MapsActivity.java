@@ -74,16 +74,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         GoogleMap.OnMarkerClickListener{
 
     //prototype
-    TestLoadingData testLoadingData = null,testLoadingData2 = null;
     private ImageView gimg,simg,simg2;
     private TextView gtxt,stxt,stxt2;
     //-------------------------------------
 
     private Direction direction;
 
-    private AutoCompleteTextView startautoCompView = null, endautiComView = null;
-    private LinearLayout mSearchBar;
-    private Button mButtonDown;
+    private AutoCompleteTextView startautoCompView = null, endautiComView = null,endautiComViewSingle = null;
+    private View mSearchBar,mSearchBarSingle,mClearMap;
     private FloatingActionButton fabLocation, fabCurrentLocation,fabUpdata;
     private TextView txt;
 
@@ -92,7 +90,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private ArrayList<Marker> markers = new ArrayList<>();
     private ArrayList<LatLng> myLocaitonList = new ArrayList<>();
     public int ButtonNumber = 0;
-    //    private float DownX = 0;
     public GoogleMap mMap;
     private UiSettings mUis;
 
@@ -147,9 +144,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         fabControl(myLocaitonList);
 
-        mButtonDown = (Button) findViewById(R.id.down);
-        mSearchBar = (LinearLayout) findViewById(R.id.searchBar);
-//        LocationManager mLocationmgr = (LocationManager) getSystemService(LOCATION_SERVICE);
+        mSearchBar = findViewById(R.id.searchBar);
+        mSearchBarSingle = findViewById(R.id.searchBarSingle);
+        mClearMap = findViewById(R.id.clearMap);
 
         mRequestingLocationUpdates = false;
         mLastUpdateTime = "";
@@ -180,6 +177,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 markers.add(setMapMarker(1, s, null, end, null, null));
             }
         });
+
+        endautiComViewSingle = (AutoCompleteTextView) findViewById(R.id.endAutoComViewSingle);
+        endautiComViewSingle.setAdapter(new PlacesAutoCompleteAdapter(this, R.layout.autocomplete_list_item));
+        endautiComViewSingle.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String s = (String) parent.getItemAtPosition(position);
+                end = getLatLongFromAddress(s);
+                mMap.animateCamera(CameraUpdateFactory.newLatLng(end));
+                markers.add(setMapMarker(1, s, null, end, null, null));
+            }
+        });
+
 
         //使用該LOG可以知道當下是使用哪個執行緒,1為主執行緒
         Log.e("thread", "Map id=" + String.valueOf(Thread.currentThread().getId()));
@@ -340,10 +350,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         fabUpdata.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //取得外部儲存媒體的目錄(這裡會是/sdcard)
-                String path = Environment.getExternalStorageDirectory().getPath();
-                //檔案路徑，記得要加斜線(這樣/sdcard/filename)
-                File file = new File(path + "/" + "123456.txt");
             }
         });
          */
@@ -417,64 +423,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return marker;
     }
 
-    private int PRange, SRange, DRange;
-
-    public void OnDownButtonClick(View view) {
-        /**
-         *      1 :Map padding ride up 0 to 200
-         *      2 :Search bar ride up -200 to 0
-         *      3 :Button down ride down -10 to -100
-         */
-        if (view.getId() == R.id.down) {
-            PRange = view.getHeight();
-            SRange = view.getHeight();
-            DRange = view.getHeight();
-        }
-        Log.e("Test:", "PRange = " + String.valueOf(PRange) +
-                "SRange = " + String.valueOf(SRange) + "DRange = " + String.valueOf(DRange));
-        myAnimation(0, 200, -200, 200, -10, -90);
-        mButtonDown.setTranslationX(-100);
-//        direction.parserTask.deletePolyLine();
-        mMap.clear();
-        Percentclean();
-    }
-
-    private void SearchBarRideUp() {
-        /**
-         *      1 :Map padding ride up 200 to 0
-         *      2 :Search bar ride up 0 to -200
-         *      3 :Button down ride down -100 to -10
-         *      myAnimation((1,2,3).translation,(1,2,3).start point)
-         */
-        myAnimation(200, -200, 0, -200, -100, 90);
-        mButtonDown.setTranslationX(mSearchBar.getWidth() / 2 - 20);
-    }
-
-    private void myAnimation(int Pstart, int PRange, int Sstart, int SRange, int Dstart, int DRange) {
-        PRange = PRange / 10;
-        SRange = SRange / 10;
-        DRange = DRange / 10;
-        int i = 0;
-        Handler handler1 = new Handler();
-        while (i < 10) {
-            Pstart += PRange;
-            Sstart += SRange;
-            Dstart += DRange;
-            final int finalPtemp = Pstart;
-            final int finalStemp = Sstart;
-            final int finalDtemp = Dstart;
-            handler1.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-//                    mMap.setPadding(0, finalPtemp, 0, 0);
-                    mSearchBar.setTranslationY(finalStemp);
-                    mButtonDown.setTranslationY(finalDtemp);
-                }
-            }, 25 * i);
-            i++;
-        }
-    }
-
     /**
      * =============================================================================================
      * Places Picker
@@ -484,8 +432,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onSearch(View view) {
         if (view.getId() == R.id.placeB1)
             ButtonNumber = 1;
-        else if (view.getId() == R.id.placeB2)
-            ButtonNumber = 2;
         PlacePicker.IntentBuilder intentBuilder = new PlacePicker.IntentBuilder();
         Intent intent;
         try {
@@ -512,12 +458,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 start = latlng;
                 this.place_startname = name;
                 markers.add(setMapMarker(0, name, address, start, number, Type));
-            } else if (ButtonNumber == 2) {
+            } else{
                 endautiComView.setText(name);
+                endautiComViewSingle.setText(name);
                 end = latlng;
                 this.place_endname = name;
                 markers.add(setMapMarker(1, name, address, end, number, Type));
             }
+            showClearMap();
         }
     }
 
@@ -525,55 +473,95 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * Navigation    判斷是否為空值、直接輸入文字或是選取地點
      */
     public void onNavigation(View view) {
-        String starttmp, endtmp;
-        starttmp = startautoCompView.getText().toString();
-        endtmp = endautiComView.getText().toString();
-        if (!starttmp.equals("")) {
-            startautoCompView.setHint("Start Location");
-            startautoCompView.setHintTextColor(0x454545);
+        String starttmp = startautoCompView.getText().toString();
+        String endtmp = endautiComView.getText().toString();
+        String endtmpSingle = endautiComViewSingle.getText().toString();
+        Log.d("Test",String.valueOf(view.getId()));
+        switch (view.getId()){
+            case R.id.NavigationB:
+                if (!starttmp.equals("")) {
+                    startautoCompView.setHint("Start Location");
+                    startautoCompView.setHintTextColor(0x454545);
+                }
+                if (starttmp.equals("")) {
+                    startautoCompView.setHint("Your Location...");
+                    startautoCompView.setHintTextColor(Color.BLACK);
+                    try {
+                        start = mLatLng();
+                    } catch (NullPointerException e) {
+                        toast("Your origin or destination isn't found!!");
+                    }
+                    if (endtmp.equals(""))
+                        toast("Destination is null,Pleas check");
+                    else {
+                        if (place_endname != null)
+                            if (!place_endname.equals(endtmp))
+                                end = getLatLongFromAddress(endtmp);
+                        direction = new Direction(start, end, mMap);
+                        direction.execute();
+                        showClearMap();
+                    }
+                } else {
+                    if (place_startname != null) {
+                        if (!place_startname.equals(starttmp))
+                            start = getLatLongFromAddress(starttmp);
+                    }else start = getLatLongFromAddress(starttmp);
+                    if (place_endname != null) {
+                        if (!place_endname.equals(endtmp))
+                            end = getLatLongFromAddress(endtmp);
+                    }else end = getLatLongFromAddress(endtmp);
+                    direction = new Direction(start, end, mMap);
+                    direction.execute();
+                    showClearMap();
+                }
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(start, 18));
+                break;
+            case R.id.NavigationSingle:
+                try {
+                    startautoCompView.setHint("Your Location...");
+                    startautoCompView.setHintTextColor(Color.BLACK);
+                        start = mLatLng();
+
+                    if (place_endname != null) {
+                        if (!place_endname.equals(endtmpSingle))
+                            end = getLatLongFromAddress(endtmpSingle);
+                    }else end = getLatLongFromAddress(endtmpSingle);
+                    direction = new Direction(start, end, mMap);
+                    direction.execute();
+                    endautiComView.setText(endtmpSingle);
+                    mSearchBarSingle.setVisibility(view.GONE);
+                    mSearchBar.setVisibility(view.VISIBLE);
+                    showClearMap();
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(start, 18));
+                } catch (NullPointerException e) {
+                    toast("Your origin or destination isn't found!!");
+                }break;
         }
-        if (starttmp.equals("")) {
-            startautoCompView.setHint("Your Location...");
-            startautoCompView.setHintTextColor(Color.BLACK);
-            try {
-                start = mLatLng();
-            } catch (NullPointerException e) {
-                toast("Your locate isn't found,please check GPS is open");
-            }
-            if (endtmp.equals(""))
-                toast("Destination is null,Pleas check");
-            else {
-                if (place_endname != null)
-                    if (!place_endname.equals(endtmp))
-                        end = getLatLongFromAddress(endtmp);
-                SearchBarRideUp();
-                direction = new Direction(start, end, mMap);
-                direction.execute();
-            }
-        } else {
-            if (place_startname != null) {
-                if (!place_startname.equals(starttmp))
-                    start = getLatLongFromAddress(starttmp);
-            }else start = getLatLongFromAddress(starttmp);
-            if (place_endname != null) {
-                if (!place_endname.equals(endtmp))
-                    end = getLatLongFromAddress(endtmp);
-            }else end = getLatLongFromAddress(endtmp);
-            SearchBarRideUp();
-            direction = new Direction(start, end, mMap);
-            direction.execute();
-        }
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(start, 18));
+
 
         //Updata for prototype
-//        if (start.equals("淡江大學") && end.equals("淡水捷運站")) {
-            testLoadingData = new TestLoadingData(mMap,1);
-//            testLoadingData.execute();
+        if (starttmp.contains("淡水捷運站") && endtmp.contains("淡江大學")) {
+            TestLoadingData testLoadingData = new TestLoadingData(mMap,1);
             testLoadingData.execute();
-            testLoadingData2 = new TestLoadingData(mMap,2);
+            TestLoadingData testLoadingData2 = new TestLoadingData(mMap,2);
             testLoadingData2.execute();
+            TestLoadingData testLoadingData3 = new TestLoadingData(mMap,3);
+            testLoadingData3.execute();
+            showClearMap();
             ShowPercent();
-//        }
+        }else {
+            Percentclean();
+        }
+    }
+
+    private void showClearMap(){
+        mClearMap.setVisibility(View.VISIBLE);
+    }
+
+    private void clearMap(View view){
+        mClearMap.setVisibility(View.INVISIBLE);
+        Percentclean();
+        mMap.clear();
     }
 
     private void ShowPercent() {
@@ -812,20 +800,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         int resourceId = resources.getIdentifier("navigation_bar_height", "dimen", "android");
         if (resourceId > 0) {
             return resources.getDimensionPixelSize(resourceId);
-        }
-        return 0;
-    }
-
-    private int getStatusHeight(Context context, int type) {
-        Resources resources = context.getResources();
-        int resourceId = resources.getIdentifier("status_bar_height", "dimen", "android");
-        if (resourceId > 0) {
-            if (type == 0)
-                return resources.getDimensionPixelSize(resourceId)
-                        + mSearchBar.getHeight();
-            else if (type == 1)
-                return resources.getDimensionPixelSize(resourceId)
-                        + mSearchBar.getHeight();
         }
         return 0;
     }

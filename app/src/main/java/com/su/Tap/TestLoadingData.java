@@ -52,6 +52,9 @@ public class TestLoadingData  extends AsyncTask<Void, Void, ArrayList<LatLng>>{
                 case 2:
                     filename = "json2.txt";
                     break;
+                case 3:
+                    filename = "json3.txt";
+                    break;
                 default:
                     filename = "json.txt";
                     break;
@@ -86,11 +89,11 @@ public class TestLoadingData  extends AsyncTask<Void, Void, ArrayList<LatLng>>{
         PolylineOptions polyline = new PolylineOptions();
         polyline.addAll(result);
         switch (flag){
-            case 1:
-                polyline.color(Color.GRAY);
-                break;
             case 2:
                 polyline.color(Color.RED);
+                break;
+            default:
+                polyline.color(Color.GRAY);
                 break;
         }
         polyline.width(8);

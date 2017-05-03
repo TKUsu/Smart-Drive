@@ -537,8 +537,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     toast("Your origin or destination isn't found!!");
                 }break;
         }
-
-
+        
         //Updata for prototype
         if (starttmp.contains("淡水捷運站") && endtmp.contains("淡江大學")) {
             TestLoadingData testLoadingData = new TestLoadingData(mMap,1);
